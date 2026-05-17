@@ -125,18 +125,25 @@ body{
   letter-spacing:2px;text-transform:none;
 }
 
-/* 头版大温度：竖排单列——任何宽度/缩放都不会诡异换行 */
+/* 头版大温度：图标+温度锁同一行，绝不换行；字号随宽度流体缩放，
+   窄屏自动变小保持紧凑（不是堆叠、不是硬换行），宽屏有上限。 */
 .hero-now{
-  display:flex;flex-direction:column;align-items:flex-start;gap:.25rem;
+  display:flex;flex-direction:column;align-items:flex-start;gap:.35rem;
   margin:var(--s4) 0 var(--s5);width:100%;
 }
-.now-icon{font-size:3.6rem;line-height:1;}
-.now-temp{
-  font-family:var(--serif);
-  font-size:clamp(4.4rem,24vw,7rem);font-weight:900;line-height:.9;
-  letter-spacing:-2px;
+.now-main{
+  display:flex;align-items:center;flex-wrap:nowrap;gap:.5rem;
+  max-width:100%;min-width:0;
 }
-.now-side{display:flex;flex-direction:column;gap:.25rem;min-width:0;width:100%;margin-top:.3rem;}
+.now-icon{
+  font-size:clamp(2.4rem,11vw,3.8rem);line-height:1;flex:0 0 auto;
+}
+.now-temp{
+  font-family:var(--serif);font-weight:900;line-height:.9;letter-spacing:-2px;
+  font-size:clamp(3rem,19vw,7rem);          /* 随视口宽流体缩放，窄屏一行不溢出 */
+  white-space:nowrap;flex:0 1 auto;min-width:0;
+}
+.now-side{display:flex;flex-direction:column;gap:.25rem;min-width:0;width:100%;margin-top:.4rem;}
 .now-desc{font-family:var(--serif);font-size:1.7rem;font-weight:800;line-height:1.1;}
 .now-range{font-size:1rem;font-weight:700;color:var(--ink-soft);letter-spacing:.5px;}
 
