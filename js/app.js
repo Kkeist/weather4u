@@ -83,17 +83,13 @@
     // 每天一小列横排在同一个框里；最高/最低写出文字，不只是两个数字
     $('dailyList').innerHTML = w.daily.map(function (d) {
       var air = d.aqiName ? '<div class="day-air">空气' + esc(d.aqiName) + '</div>' : '';
-      // 免费数据源没有「降水概率%」，不编数字；按天如实标出会不会下雨/雪/雷
-      var ds = String(d.desc || '');
-      var rain = /雪/.test(ds) ? '有雪' : /雷/.test(ds) ? '有雷雨' : /雨/.test(ds) ? '有雨' : '';
-      var wet = rain ? ' wet' : '';
-      var rainTag = rain ? '<div class="day-rain">' + rain + '</div>' : '';
+      // 恶劣天气(雨/雷/雪)那天只把天气词变色，不另起一行字
+      var wet = /雨|雷|雪/.test(String(d.desc || '')) ? ' wet' : '';
       return '<div class="day-col">' +
                '<div class="day-name">' + esc(d.day) + '</div>' +
                '<div class="day-date">' + esc(d.date || '') + '</div>' +
                '<div class="day-icon">' + WeatherIcons.emoji(d.type) + '</div>' +
                '<div class="day-desc' + wet + '">' + esc(d.desc) + '</div>' +
-               rainTag +
                '<div class="day-hi"><span class="lab">最高</span>' + d.max + '°</div>' +
                '<div class="day-lo"><span class="lab">最低</span>' + d.min + '°</div>' +
                air +

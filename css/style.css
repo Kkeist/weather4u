@@ -234,7 +234,6 @@ body{
   max-width:5.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .day-desc.wet{color:var(--accent);font-weight:800;}
-.day-rain{font-size:.72rem;color:var(--accent);font-weight:900;letter-spacing:.5px;}
 .day-hi{font-family:var(--serif);font-size:1.4rem;font-weight:900;line-height:1.05;color:var(--accent);}
 .day-lo{font-family:var(--serif);font-size:1.08rem;font-weight:800;line-height:1.1;color:var(--ink-soft);}
 .day-hi .lab,.day-lo .lab{
