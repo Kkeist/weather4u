@@ -1,159 +1,185 @@
 /* ============================================================
-   老年天气新闻 · 全新排版（v3 · 清爽留白 / 大字 / 无蓝色大头）
-   彻底换视觉：去掉渐变 banner，改纯净背景 + 深墨超大数字 +
-   靛紫强调色 + 扁平柔和卡片 + 数据成一行。
-   老年化：大字、高对比、点击区≥44px、tap 不依赖 hover、
-   全 rem/clamp 随屏与系统缩放、日夜全靠变量、无系统预设残留。
-   功能与内容一字不少，仅样式重做。
+   老年天气新闻 · 排版 v4「数字老黄历 / 报纸头版」
+   —— 依 anthropic frontend-design skill 重做：
+   有明确概念方向(中式报纸/老黄历)、特色衬线字体(非通用 sans)、
+   主色暖纸 + 利落朱红强调(非"紫渐变白底"陈词滥调)、
+   纸纹氛围、细线分栏的编辑式构图、载入分层淡入。
+   守本项目硬约束(高于 skill)：老年化大字高对比、命中区≥44px、
+   tap 不依赖 hover、全 rem/clamp 随屏缩放、离线无外部字体、
+   日夜全靠变量、内容与 element id 一字不改、app.js 逻辑零改。
    ============================================================ */
 :root{
   font-size:clamp(17px, 4.6vw, 22px);
 
   --s1:.35rem; --s2:.6rem; --s3:.9rem; --s4:1.25rem; --s5:1.7rem; --s6:2.4rem;
-  --r-sm:.8rem; --r:1.2rem; --r-lg:1.75rem; --r-xl:2.2rem;
+  --r-sm:.25rem; --r:.4rem; --r-lg:.55rem; --r-xl:.7rem;   /* 报纸式：圆角克制 */
   --maxw:34rem;
 
-  --bg:#f1f2f6;
-  --surface:#ffffff;
-  --ink:#14161c;
-  --ink-soft:#787f8d;
-  --line:#e7e8ef;
-  --accent:#5646e5;
-  --accent-ink:#ffffff;
-  --accent-soft:#ecebfd;
-  --chip:#f3f4f9;
-  --tap:rgba(86,70,229,.10);
-  --good:#119a6b;
-  --warn-bg:#fff3e1;
-  --warn-ink:#965400;
-  --warn-line:#ffce86;
+  /* 暖纸 + 墨 + 朱红印泥（高对比，老人易读；非紫非蓝非渐变白底） */
+  --paper:#f1e7d4;
+  --surface:#fbf4e4;
+  --ink:#1d1813;
+  --ink-soft:#7a6c57;
+  --line:#d6c4a4;
+  --rule:#2a2017;                 /* 报头粗墨线 */
+  --accent:#b5392a;               /* 朱红 */
+  --accent-ink:#fbf4e4;
+  --accent-soft:#efdcc6;
+  --good:#3a7d44;
+  --warn-bg:#f7e7c8;
+  --warn-ink:#8a5300;
+  --warn-line:#cba35a;
 
-  --shadow:0 10px 30px rgba(20,22,40,.08);
-  --shadow-sm:0 4px 16px rgba(20,22,40,.06);
+  --serif:"Songti SC","STSong","Source Han Serif SC","Noto Serif CJK SC","SimSun","STZhongsong",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+
+  --shadow:0 2px 0 var(--line);
+  --shadow-sm:0 1px 0 var(--line);
 }
 body.dark{
-  --bg:#0b0c10;
-  --surface:#15171d;
-  --ink:#eef0f5;
-  --ink-soft:#949aa8;
-  --line:#262932;
-  --accent:#8f88f7;
-  --accent-ink:#0a0b14;
-  --accent-soft:#211f3a;
-  --chip:#1b1e26;
-  --tap:rgba(143,136,247,.18);
-  --good:#3ed09b;
-  --warn-bg:#382713;
-  --warn-ink:#ffc680;
-  --warn-line:#6f4e1c;
-
-  --shadow:0 10px 30px rgba(0,0,0,.45);
-  --shadow-sm:0 4px 16px rgba(0,0,0,.35);
+  --paper:#15120d;
+  --surface:#1e1a13;
+  --ink:#efe5d2;
+  --ink-soft:#9c8c70;
+  --line:#3a3022;
+  --rule:#c9b896;
+  --accent:#e07355;
+  --accent-ink:#15120d;
+  --accent-soft:#2b2015;
+  --good:#5fb46a;
+  --warn-bg:#33270f;
+  --warn-ink:#e6b15c;
+  --warn-line:#5f4a22;
+  --shadow:0 2px 0 var(--line);
+  --shadow-sm:0 1px 0 var(--line);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 [hidden]{display:none !important;}
 html,body{min-height:100%;}
 body{
-  background:var(--bg);color:var(--ink);
-  font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  background-color:var(--paper);
+  /* 纸纹氛围：细颗粒噪点，内联 SVG（离线无外部依赖），极淡不碍读 */
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, rgba(181,57,42,.05), transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
+  color:var(--ink);
+  font-family:var(--sans);
   line-height:1.55;-webkit-font-smoothing:antialiased;
-  transition:background .25s,color .25s;
+  transition:background-color .25s,color .25s;
 }
-::selection{background:var(--tap);}
+::selection{background:var(--accent);color:var(--accent-ink);}
 
 .page{
   width:100%;max-width:var(--maxw);margin:0 auto;
-  padding:calc(.6rem + env(safe-area-inset-top)) var(--s4)
-          calc(7rem + env(safe-area-inset-bottom));
+  padding:0 var(--s4) calc(7rem + env(safe-area-inset-bottom));
 }
 
-/* ============ 天气大头：纯净背景，超大数字为主角 ============ */
-.hero{padding:var(--s3) 0 var(--s5);}
-.hero-top{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);}
+/* 载入：分层淡入（仅静态骨架，不随 app.js 重渲染重放；尊重减弱动效） */
+@media (prefers-reduced-motion:no-preference){
+  @keyframes riseIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  .hero,.alert-box,.card{animation:riseIn .5s cubic-bezier(.2,.7,.3,1) both;}
+  .alert-box{animation-delay:.06s;}
+  .card:nth-of-type(1){animation-delay:.10s;}
+  .card:nth-of-type(2){animation-delay:.16s;}
+  .card{animation-delay:.20s;}
+}
+
+/* ============ 报头：城市作刊名，粗墨线 + 日期作 dateline ============ */
+.hero{
+  padding:calc(1rem + env(safe-area-inset-top)) 0 var(--s5);
+  border-bottom:3px double var(--rule);
+  margin-bottom:var(--s5);
+}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-end;gap:var(--s3);
+  padding-bottom:var(--s3);border-bottom:1px solid var(--line);}
 .city-btn{
-  display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0;
+  display:flex;flex-direction:column;align-items:flex-start;gap:.25rem;min-width:0;
   background:none;border:none;color:var(--ink);cursor:pointer;
-  padding:.3rem .1rem;min-height:2.8rem;text-align:left;
+  padding:.2rem .05rem;min-height:2.8rem;text-align:left;
 }
 #cityName{
-  font-size:1.95rem;font-weight:800;line-height:1.1;letter-spacing:.3px;
+  font-family:var(--serif);
+  font-size:2.4rem;font-weight:900;line-height:1.05;letter-spacing:1px;
   max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 .city-hint{
-  font-size:.84rem;font-weight:600;color:var(--accent);
+  font-size:.82rem;font-weight:700;color:var(--accent);letter-spacing:.5px;
   max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.hero-ctrls{display:flex;gap:.55rem;flex:0 0 auto;}
+.hero-ctrls{display:flex;gap:.5rem;flex:0 0 auto;}
 .icon-btn{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.18rem;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;
   color:var(--ink);background:var(--surface);
-  border:1.5px solid var(--line);border-radius:1.4rem;cursor:pointer;
-  width:3.5rem;min-height:3.5rem;padding:.4rem .2rem;box-shadow:var(--shadow-sm);
-  transition:background .15s;
+  border:1.5px solid var(--rule);border-radius:var(--r);cursor:pointer;
+  width:3.4rem;min-height:3.4rem;padding:.4rem .2rem;
 }
-.icon-btn:active{background:var(--tap);}
-.icon-btn-ic{width:1.45rem;height:1.45rem;display:block;color:var(--accent);}
+.icon-btn:active{background:var(--accent);color:var(--accent-ink);}
+.icon-btn:active .icon-btn-ic,.icon-btn:active .icon-btn-tx{color:inherit;}
+.icon-btn-ic{width:1.4rem;height:1.4rem;display:block;color:var(--accent);}
 .icon-btn-ic svg{width:100%;height:100%;display:block;}
-.icon-btn-tx{font-size:.7rem;font-weight:700;line-height:1;white-space:nowrap;color:var(--ink-soft);}
+.icon-btn-tx{font-size:.7rem;font-weight:800;line-height:1;white-space:nowrap;color:var(--ink-soft);}
 
 .hero-date{
-  margin-top:var(--s4);font-size:1rem;font-weight:700;color:var(--ink-soft);
-  letter-spacing:.5px;
+  margin-top:var(--s3);font-size:.95rem;font-weight:700;color:var(--ink-soft);
+  letter-spacing:2px;text-transform:none;
 }
 
-/* 当前天气：温度巨大居中，图标在上，天气与温差在下 */
+/* 头版大温度：衬线巨号，像头条数字 */
 .hero-now{
-  display:flex;flex-direction:column;align-items:center;text-align:center;
-  gap:.2rem;margin:var(--s3) 0 var(--s5);
+  display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap;
+  margin:var(--s4) 0 var(--s5);
 }
-.now-icon{font-size:4.6rem;line-height:1;}
+.now-icon{font-size:3.6rem;line-height:1;flex:0 0 auto;}
 .now-temp{
-  font-size:clamp(4.6rem,26vw,7rem);font-weight:800;line-height:.95;
-  letter-spacing:-3px;
+  font-family:var(--serif);
+  font-size:clamp(4.6rem,25vw,7rem);font-weight:900;line-height:.82;
+  letter-spacing:-2px;flex:0 0 auto;
 }
-.now-side{display:flex;flex-direction:column;align-items:center;gap:.25rem;margin-top:.3rem;}
-.now-desc{font-size:1.6rem;font-weight:800;}
-.now-range{font-size:1.05rem;font-weight:600;color:var(--ink-soft);}
+.now-side{display:flex;flex-direction:column;gap:.3rem;min-width:0;flex:1 1 auto;
+  padding-bottom:.4rem;}
+.now-desc{font-family:var(--serif);font-size:1.7rem;font-weight:800;line-height:1.05;}
+.now-range{font-size:1rem;font-weight:700;color:var(--ink-soft);letter-spacing:.5px;}
 
-/* 四项数据：一整行干净排版，细分隔线，无卡片框 */
+/* 数据：老黄历式细线分栏一行 */
 .hero-stats{
   display:grid;grid-template-columns:repeat(4,1fr);
-  background:var(--surface);border-radius:var(--r-lg);
-  box-shadow:var(--shadow-sm);padding:var(--s3) 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
 }
 .stat{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;
-  min-height:3.8rem;padding:.4rem .25rem;text-align:center;position:relative;
+  min-height:4rem;padding:.7rem .25rem;text-align:center;position:relative;
 }
 .stat + .stat::before{
-  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
-  height:56%;width:1px;background:var(--line);
+  content:"";position:absolute;left:0;top:18%;height:64%;width:1px;background:var(--line);
 }
-.stat-label{font-size:.78rem;font-weight:600;color:var(--ink-soft);}
-.stat-val{font-size:clamp(.95rem,3.8vw,1.12rem);font-weight:800;line-height:1.2;word-break:keep-all;}
+.stat-label{font-size:.76rem;font-weight:700;color:var(--ink-soft);letter-spacing:1px;}
+.stat-val{font-family:var(--serif);font-size:clamp(1rem,3.9vw,1.2rem);font-weight:800;line-height:1.18;word-break:keep-all;}
 .stat-val span{display:block;}
 .hero-tip{
-  margin-top:var(--s4);background:var(--accent-soft);color:var(--accent);
-  border-radius:var(--r);padding:.85rem 1.1rem;font-size:1.02rem;font-weight:700;
+  margin-top:var(--s4);background:var(--accent);color:var(--accent-ink);
+  border-radius:var(--r);padding:.8rem 1.05rem;font-size:1.02rem;font-weight:800;letter-spacing:.5px;
 }
 .hero-updated{
-  display:block;margin-top:var(--s3);font-size:.78rem;color:var(--ink-soft);
-  text-align:center;letter-spacing:.3px;
+  display:block;margin-top:var(--s3);font-size:.76rem;color:var(--ink-soft);
+  text-align:right;letter-spacing:1px;
 }
 
-/* ============ 区块 / 卡片：扁平柔和，强标题 ============ */
+/* ============ 版块 / 卡片：编辑式细框，标题作栏目头 ============ */
 .card{
-  background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
-  padding:var(--s5) var(--s4);margin-top:var(--s5);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r-lg);box-shadow:var(--shadow);
+  padding:var(--s4) var(--s4) var(--s5);margin-top:var(--s5);
 }
 .card-title{
-  font-size:1.05rem;font-weight:800;color:var(--ink);
-  letter-spacing:1.5px;margin-bottom:var(--s4);
-  display:flex;align-items:center;gap:.6rem;
+  font-family:var(--serif);
+  font-size:1.3rem;font-weight:900;color:var(--ink);letter-spacing:2px;
+  display:flex;align-items:center;gap:.55rem;
+  padding-bottom:.65rem;margin-bottom:var(--s4);
+  border-bottom:2px solid var(--rule);
 }
 .card-title::before{
-  content:"";width:1.3rem;height:.28rem;border-radius:999px;background:var(--accent);
+  content:"";width:.55rem;height:1.25rem;background:var(--accent);flex:0 0 auto;
 }
 
 /* 天气预警 */
@@ -164,7 +190,7 @@ body{
 .alert-item{display:flex;gap:.7rem;align-items:flex-start;}
 .alert-item + .alert-item{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--warn-line);}
 .alert-emoji{font-size:1.6rem;line-height:1.1;flex:0 0 auto;}
-.alert-title{font-size:1.12rem;font-weight:800;}
+.alert-title{font-family:var(--serif);font-size:1.15rem;font-weight:900;}
 .alert-text{font-size:.98rem;margin-top:.25rem;line-height:1.6;}
 
 /* ============ 逐小时折线图 ============ */
@@ -172,7 +198,7 @@ body{
 .hourly-scroll::-webkit-scrollbar{display:none;}
 .hourly-scroll svg{height:clamp(11.5rem,44vw,14.5rem);width:auto;display:block;}
 .ht-area{fill:url(#htgrad);}
-#htgrad .g1{stop-color:var(--accent);stop-opacity:.26;}
+#htgrad .g1{stop-color:var(--accent);stop-opacity:.22;}
 #htgrad .g2{stop-color:var(--accent);stop-opacity:0;}
 .ht-line{stroke:var(--accent);fill:none;}
 .ht-dot{fill:var(--surface);stroke:var(--accent);}
@@ -181,96 +207,101 @@ body{
 .ht-wx{fill:var(--ink);font-weight:700;}
 .ht-sub{fill:var(--ink-soft);}
 
-/* ============ 本周天气：横排日卡 ============ */
+/* ============ 本周天气：横排日栏 ============ */
 .week{
-  display:flex;gap:.6rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  margin:0 -.4rem;padding:.15rem .4rem;
+  display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 -.4rem;padding:.1rem .4rem;
 }
 .week::-webkit-scrollbar{display:none;}
 .day-col{
   flex:1 0 auto;min-width:4.7rem;
-  display:flex;flex-direction:column;align-items:center;gap:.55rem;
-  background:var(--chip);border-radius:var(--r);padding:1.05rem .5rem;text-align:center;
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  padding:.5rem .55rem;text-align:center;border-right:1px solid var(--line);
 }
-.day-name{font-size:1.05rem;font-weight:800;}
-.day-icon{font-size:2.15rem;line-height:1;}
+.day-col:last-child{border-right:none;}
+.day-name{font-family:var(--serif);font-size:1.1rem;font-weight:900;}
+.day-icon{font-size:2.1rem;line-height:1;}
 .day-desc{
-  font-size:.76rem;color:var(--ink-soft);
+  font-size:.74rem;color:var(--ink-soft);
   max-width:5.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.day-hi{font-size:1.35rem;font-weight:800;line-height:1.1;color:var(--accent);}
-.day-lo{font-size:1.05rem;font-weight:700;line-height:1.1;color:var(--ink-soft);}
+.day-hi{font-family:var(--serif);font-size:1.4rem;font-weight:900;line-height:1.05;color:var(--accent);}
+.day-lo{font-family:var(--serif);font-size:1.08rem;font-weight:800;line-height:1.1;color:var(--ink-soft);}
 .day-hi .lab,.day-lo .lab{
-  display:block;font-size:.64rem;font-weight:700;letter-spacing:.6px;
-  color:var(--ink-soft);opacity:.8;margin-bottom:.05rem;
+  display:block;font-family:var(--sans);font-size:.62rem;font-weight:800;
+  letter-spacing:1px;color:var(--ink-soft);opacity:.85;margin-bottom:.05rem;
 }
-.day-air{font-size:.74rem;color:var(--good);font-weight:800;letter-spacing:.3px;}
+.day-air{font-size:.72rem;color:var(--good);font-weight:800;letter-spacing:.3px;}
 
-/* ============ 新闻分类筛选：文字 tab，选中实色 pill ============ */
+/* ============ 新闻分类：报纸栏目签 ============ */
 .news-filter{
-  display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  margin:0 calc(-1 * var(--s4)) ;padding:var(--s3) var(--s4) .5rem;
+  display:flex;gap:.4rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 calc(-1 * var(--s4));padding:var(--s3) var(--s4) var(--s3);
+  border-bottom:3px double var(--rule);
 }
 .news-filter:empty{display:none;}
 .news-filter::-webkit-scrollbar{display:none;}
 .news-chip{
-  flex:0 0 auto;font:inherit;font-size:1rem;font-weight:700;
+  flex:0 0 auto;font:inherit;font-size:1rem;font-weight:800;letter-spacing:.5px;
   color:var(--ink-soft);background:none;border:none;
-  border-radius:999px;padding:.55rem 1.05rem;min-height:2.9rem;cursor:pointer;
-  white-space:nowrap;transition:color .15s,background .15s;
+  border-radius:var(--r-sm);padding:.5rem .95rem;min-height:2.9rem;cursor:pointer;
+  white-space:nowrap;
 }
-.news-chip:active{background:var(--tap);}
+.news-chip:active{background:var(--accent-soft);}
 .news-chip.on{color:var(--accent-ink);background:var(--accent);}
 
-/* ============ 新闻列表 ============ */
-.news-list{display:flex;flex-direction:column;gap:var(--s4);padding-top:.4rem;}
+/* ============ 新闻列表：头条式 ============ */
+.news-list{display:flex;flex-direction:column;gap:0;padding-top:.4rem;}
 .news-card{
   display:flex;flex-direction:column;width:100%;text-align:left;font:inherit;cursor:pointer;
-  background:var(--surface);border:none;border-radius:var(--r-lg);
-  box-shadow:var(--shadow-sm);overflow:hidden;color:var(--ink);
-  transition:transform .12s;
+  background:none;border:none;color:var(--ink);
+  padding:var(--s5) 0;border-bottom:1px solid var(--line);
 }
-.news-card:active{transform:scale(.985);}
-.news-thumb{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--chip);display:block;}
-.news-body{display:flex;flex-direction:column;padding:var(--s4);}
+.news-card:first-child{padding-top:var(--s4);}
+.news-card:active{opacity:.62;}
+.news-thumb{
+  width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--accent-soft);display:block;
+  border-radius:var(--r);margin-bottom:var(--s4);
+}
+.news-body{display:flex;flex-direction:column;}
 .news-cat{
-  align-self:flex-start;font-size:.82rem;font-weight:800;color:var(--accent);
-  letter-spacing:.5px;margin-bottom:.5rem;
+  align-self:flex-start;font-size:.8rem;font-weight:900;color:var(--accent);
+  letter-spacing:2px;margin-bottom:.5rem;
 }
-.news-title{font-size:1.32rem;font-weight:800;line-height:1.45;}
-.news-meta{font-size:.9rem;color:var(--ink-soft);margin-top:.7rem;}
+.news-title{font-family:var(--serif);font-size:1.42rem;font-weight:800;line-height:1.4;}
+.news-meta{font-size:.88rem;color:var(--ink-soft);margin-top:.65rem;letter-spacing:.5px;}
 
 /* 看更早 */
-.news-more{padding:var(--s4) 0 calc(1rem + env(safe-area-inset-bottom));}
+.news-more{padding:var(--s5) 0 calc(1rem + env(safe-area-inset-bottom));}
 .news-more:empty{display:none;}
 .news-more-btn{
-  width:100%;font:inherit;font-size:1.12rem;font-weight:800;
+  width:100%;font:inherit;font-family:var(--serif);font-size:1.15rem;font-weight:900;letter-spacing:1px;
   color:var(--accent-ink);background:var(--accent);
   border:none;border-radius:var(--r);padding:1.05rem;min-height:3.4rem;cursor:pointer;
 }
-.news-more-btn:active{opacity:.88;}
-.news-more-tip{text-align:center;color:var(--ink-soft);font-size:1rem;padding:1.1rem;}
+.news-more-btn:active{opacity:.85;}
+.news-more-tip{text-align:center;color:var(--ink-soft);font-size:1rem;padding:1.1rem;letter-spacing:.5px;}
 
 /* 状态提示 */
 .state-msg{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.6rem 1rem;line-height:1.7;}
 .state-msg button{
-  display:block;margin:1.1rem auto 0;font:inherit;font-size:1.05rem;font-weight:800;
+  display:block;margin:1.1rem auto 0;font:inherit;font-weight:900;font-size:1.05rem;
   color:var(--accent-ink);background:var(--accent);
   border:none;border-radius:var(--r);padding:.8rem 1.7rem;min-height:3rem;cursor:pointer;
 }
 
-/* ============ 阅读页 ============ */
-.reader{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;}
+/* ============ 阅读页：报纸正文 ============ */
+.reader{position:fixed;inset:0;background:var(--paper);z-index:20;display:flex;flex-direction:column;}
 .reader-bar{
-  background:var(--surface);border-bottom:1px solid var(--line);
+  background:var(--surface);border-bottom:2px solid var(--rule);
   padding:.6rem .7rem;padding-top:calc(.6rem + env(safe-area-inset-top));
 }
 .reader-back{
   display:flex;align-items:center;gap:.4rem;background:none;border:none;
-  color:var(--accent);font:inherit;font-size:1.2rem;font-weight:800;cursor:pointer;
+  color:var(--accent);font:inherit;font-size:1.2rem;font-weight:900;cursor:pointer;
   padding:.5rem .7rem;border-radius:var(--r-sm);min-height:3.2rem;
 }
-.reader-back:active{background:var(--tap);}
+.reader-back:active{background:var(--accent-soft);}
 .back-arrow{width:1.5rem;height:1.5rem;display:inline-block;}
 .reader-body{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;
@@ -278,34 +309,37 @@ body{
   padding:var(--s5) var(--s5) calc(2.6rem + env(safe-area-inset-bottom));
 }
 .reader-cat{
-  display:inline-block;font-size:.85rem;font-weight:800;color:var(--accent);letter-spacing:.5px;
+  display:inline-block;font-size:.85rem;font-weight:900;color:var(--accent);letter-spacing:2px;
 }
-.reader-title{font-size:1.8rem;font-weight:800;line-height:1.4;margin:.7rem 0 .5rem;}
+.reader-title{
+  font-family:var(--serif);font-size:2rem;font-weight:900;line-height:1.35;
+  margin:.6rem 0 .5rem;
+}
 .reader-meta{
-  font-size:.95rem;color:var(--ink-soft);margin-bottom:1.3rem;
-  border-bottom:1px solid var(--line);padding-bottom:1rem;
+  font-size:.92rem;color:var(--ink-soft);margin-bottom:1.3rem;letter-spacing:.5px;
+  border-bottom:2px solid var(--rule);padding-bottom:1rem;
 }
-.reader-body p{font-size:1.22rem;line-height:2;margin-bottom:1.2rem;}
-.reader-body img{display:block;width:100%;height:auto;border-radius:var(--r);margin:.5rem 0 1.3rem;background:var(--chip);}
+.reader-body p{font-size:1.22rem;line-height:2.05;margin-bottom:1.2rem;}
+.reader-body img{display:block;width:100%;height:auto;border-radius:var(--r);margin:.5rem 0 1.3rem;background:var(--accent-soft);}
 .reader-loading{color:var(--ink-soft);}
 
 /* ============ 换城市面板 ============ */
-.panel{position:fixed;inset:0;background:var(--bg);z-index:25;display:flex;flex-direction:column;}
+.panel{position:fixed;inset:0;background:var(--paper);z-index:25;display:flex;flex-direction:column;}
 .panel-bar{
   display:flex;align-items:center;justify-content:space-between;
-  background:var(--surface);border-bottom:1px solid var(--line);
+  background:var(--surface);border-bottom:2px solid var(--rule);
   padding:.9rem 1rem;padding-top:calc(.9rem + env(safe-area-inset-top));
 }
-.panel-title{font-size:1.4rem;font-weight:800;}
+.panel-title{font-family:var(--serif);font-size:1.5rem;font-weight:900;letter-spacing:1px;}
 .panel-close{
-  font:inherit;font-size:1.1rem;font-weight:800;color:var(--accent);background:var(--accent-soft);
+  font:inherit;font-size:1.1rem;font-weight:900;color:var(--accent-ink);background:var(--accent);
   border:none;border-radius:var(--r-sm);padding:.6rem 1.2rem;min-height:3.2rem;cursor:pointer;
 }
 .panel-close:active{opacity:.85;}
 .city-search{padding:var(--s4) var(--s4) .5rem;}
 .city-input{
   width:100%;font:inherit;font-size:1.2rem;color:var(--ink);
-  background:var(--surface);border:2px solid var(--line);border-radius:var(--r);
+  background:var(--surface);border:2px solid var(--rule);border-radius:var(--r);
   padding:.9rem 1.1rem;min-height:3.5rem;outline:none;transition:border-color .15s;
 }
 .city-input::placeholder{color:var(--ink-soft);}
@@ -313,67 +347,67 @@ body{
 .city-note{margin-top:.6rem;font-size:.92rem;line-height:1.55;color:var(--ink-soft);}
 .city-note[hidden]{display:none;}
 .city-results{
-  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;
-  padding:.5rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
+  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:0;
+  padding:.4rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
 }
 .city-row{
   display:flex;flex-direction:column;align-items:flex-start;gap:.18rem;
   width:100%;text-align:left;font:inherit;cursor:pointer;
-  color:var(--ink);background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r);
-  padding:.95rem 1.15rem;min-height:3.8rem;
+  color:var(--ink);background:none;
+  border:none;border-bottom:1px solid var(--line);
+  padding:1.05rem .3rem;min-height:3.8rem;
 }
-.city-row:active{background:var(--tap);}
-.city-row-name{font-size:1.25rem;font-weight:800;}
-.city-row-sub{font-size:.9rem;color:var(--ink-soft);}
+.city-row:active{background:var(--accent-soft);}
+.city-row-name{font-family:var(--serif);font-size:1.3rem;font-weight:800;}
+.city-row-sub{font-size:.9rem;color:var(--ink-soft);letter-spacing:.5px;}
 .city-tip{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.2rem 1rem;line-height:1.7;}
 .city-grid{
   flex:1;overflow-y:auto;display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(6.4rem,1fr));gap:.7rem;
-  padding:.5rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
+  grid-template-columns:repeat(auto-fill,minmax(6.2rem,1fr));gap:.6rem;
+  padding:.6rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
 }
 .city-opt{
-  font:inherit;font-size:1.18rem;font-weight:700;color:var(--ink);background:var(--surface);
-  border:1px solid var(--line);border-radius:var(--r);padding:1rem .4rem;
-  min-height:3.8rem;cursor:pointer;
+  font:inherit;font-family:var(--serif);font-size:1.18rem;font-weight:800;color:var(--ink);
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:1rem .4rem;min-height:3.8rem;cursor:pointer;
 }
-.city-opt:active{background:var(--tap);}
+.city-opt:active{background:var(--accent);color:var(--accent-ink);}
 
-/* ============ 底部标签栏：极简，选中靛紫+圆点 ============ */
+/* ============ 底部标签栏：报头线 + 朱红当选 ============ */
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;display:flex;z-index:6;
-  background:var(--surface);border-top:1px solid var(--line);
-  padding:.5rem .8rem calc(.5rem + env(safe-area-inset-bottom));
+  background:var(--surface);border-top:3px double var(--rule);
+  padding:.45rem .8rem calc(.45rem + env(safe-area-inset-bottom));
 }
 .tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.28rem;
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
   background:none;border:none;color:var(--ink-soft);
-  padding:.55rem 0;min-height:4.4rem;cursor:pointer;font:inherit;font-size:1rem;font-weight:700;
-  position:relative;transition:color .15s;
+  padding:.55rem 0;min-height:4.4rem;cursor:pointer;font:inherit;font-size:1rem;font-weight:800;
+  letter-spacing:2px;position:relative;
 }
-.tab-icon{width:1.85rem;height:1.85rem;}
+.tab-icon{width:1.8rem;height:1.8rem;}
 .tab:active{color:var(--accent);}
 .tab-active{color:var(--accent);}
 .tab-active::after{
-  content:"";position:absolute;top:.15rem;width:.4rem;height:.4rem;border-radius:999px;
-  background:var(--accent);
+  content:"";position:absolute;top:0;width:2.2rem;height:.22rem;background:var(--accent);
 }
 
 /* ============ 断网全屏引导 ============ */
 .net-guide{
-  position:fixed;inset:0;z-index:50;background:var(--bg);
+  position:fixed;inset:0;z-index:50;background:var(--paper);
   display:flex;align-items:center;justify-content:center;padding:1.5rem;
 }
 .net-card{
-  width:100%;max-width:28rem;background:var(--surface);border-radius:var(--r-xl);
+  width:100%;max-width:28rem;background:var(--surface);
+  border:1px solid var(--line);border-top:6px solid var(--accent);border-radius:var(--r-lg);
   box-shadow:var(--shadow);padding:2.2rem 1.6rem;text-align:center;
 }
 .net-emoji{font-size:3.6rem;line-height:1;}
-.net-title{font-size:1.6rem;font-weight:800;margin:1.1rem 0 .9rem;}
+.net-title{font-family:var(--serif);font-size:1.7rem;font-weight:900;margin:1.1rem 0 .9rem;}
 .net-msg{font-size:1.16rem;line-height:1.85;color:var(--ink-soft);text-align:left;}
 .net-msg b{color:var(--ink);}
 .net-btn{
-  margin-top:1.6rem;width:100%;font:inherit;font-size:1.2rem;font-weight:800;
+  margin-top:1.6rem;width:100%;font:inherit;font-family:var(--serif);font-size:1.2rem;font-weight:900;
   color:var(--accent-ink);background:var(--accent);border:none;border-radius:var(--r);
   padding:1.05rem;min-height:3.6rem;cursor:pointer;
 }
