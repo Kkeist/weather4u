@@ -65,11 +65,14 @@
     var today = w.daily && w.daily[0];
     $('nowRange').textContent = today ? ('最高 ' + today.max + '°  最低 ' + today.min + '°') : '';
 
-    var tip = [];
-    if (c.rain > 0) tip.push('正在下雨，出门带伞');
-    else if (/雨|雷/.test(c.desc)) tip.push('有雨，出门记得带伞');
+    // 下雨提示：免费数据源没有「降水概率%」，不编百分比；
+    // 用官方雨伞指数（会不会下雨、要不要带伞的权威说法）+ 正在下雨实况
+    var tip = '';
+    if (c.rain > 0) tip = '现在正在下雨，出门记得带伞。';
+    else if (w.umbrella) tip = w.umbrella;
+    else if (/雨|雷/.test(c.desc)) tip = '有雨，出门记得带伞。';
     var np = $('nowPop');
-    if (tip.length) { np.textContent = tip.join(''); np.hidden = false; } else { np.hidden = true; }
+    if (tip) { np.textContent = tip; np.hidden = false; } else { np.hidden = true; }
 
     var box = $('alertBox');
     if (w.alerts && w.alerts.length) {

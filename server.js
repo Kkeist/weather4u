@@ -154,7 +154,7 @@ async function resolveCity(name) {
 // 取真实天气并转成统一结构。sel 可为 {province,city,county,name} 或纯地名字符串
 async function buildWeather(sel, located) {
   const c = (sel && typeof sel === 'object' && sel.province) ? sel : await resolveCity(sel);
-  const url = 'https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cforecast_1h%7Cforecast_24h%7Cair%7Calarm'
+  const url = 'https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cforecast_1h%7Cforecast_24h%7Cair%7Calarm%7Cindex'
     + '&province=' + encodeURIComponent(c.province) + '&city=' + encodeURIComponent(c.city)
     + (c.county ? '&county=' + encodeURIComponent(c.county) : '');
   const j = JSON.parse((await get(url)).toString('utf8'));
@@ -213,6 +213,12 @@ async function buildWeather(sel, located) {
       aqi: (d.air && d.air.aqi) || null,
       aqiName: (d.air && d.air.aqi_name) || ''
     },
+    // 免费源没有「降水概率百分比」字段，不编。改给官方雨伞指数（要不要带伞=会不会下雨的诚实说法）
+    umbrella: (function () {
+      var u = d.index && d.index.umbrella;
+      if (!u) return '';
+      return (u.detail || u.info || '').trim();
+    })(),
     alerts: alerts
   , hourly: hourly, daily: daily };
 }
