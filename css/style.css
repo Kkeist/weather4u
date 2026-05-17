@@ -14,6 +14,9 @@
   --s1:.35rem; --s2:.6rem; --s3:.9rem; --s4:1.25rem; --s5:1.7rem; --s6:2.4rem;
   --r-sm:.25rem; --r:.4rem; --r-lg:.55rem; --r-xl:.7rem;   /* 报纸式：圆角克制 */
   --maxw:34rem;
+  /* 手机系统留白：有刘海/状态栏/手势条就按系统给的，没有也留够兜底，绝不和内容重合 */
+  --safe-top:max(env(safe-area-inset-top), 1.5rem);
+  --safe-bot:max(env(safe-area-inset-bottom), .6rem);
 
   /* 暖纸 + 墨 + 朱红印泥（高对比，老人易读；非紫非蓝非渐变白底） */
   --paper:#f1e7d4;
@@ -72,7 +75,7 @@ body{
 
 .page{
   width:100%;max-width:var(--maxw);margin:0 auto;
-  padding:0 var(--s4) calc(7rem + env(safe-area-inset-bottom));
+  padding:var(--safe-top) var(--s4) calc(7rem + var(--safe-bot));
 }
 
 /* 载入：分层淡入（仅静态骨架，不随 app.js 重渲染重放；尊重减弱动效） */
@@ -87,7 +90,7 @@ body{
 
 /* ============ 报头：城市作刊名，粗墨线 + 日期作 dateline ============ */
 .hero{
-  padding:calc(1rem + env(safe-area-inset-top)) 0 var(--s5);
+  padding:var(--s3) 0 var(--s5);
   border-bottom:3px double var(--rule);
   margin-bottom:var(--s5);
 }
@@ -303,7 +306,7 @@ body{
 .reader{position:fixed;inset:0;background:var(--paper);z-index:20;display:flex;flex-direction:column;}
 .reader-bar{
   background:var(--surface);border-bottom:2px solid var(--rule);
-  padding:.6rem .7rem;padding-top:calc(.6rem + env(safe-area-inset-top));
+  padding:.6rem .7rem;padding-top:calc(.6rem + var(--safe-top));
 }
 .reader-back{
   display:flex;align-items:center;gap:.4rem;background:none;border:none;
@@ -337,7 +340,7 @@ body{
 .panel-bar{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--surface);border-bottom:2px solid var(--rule);
-  padding:.9rem 1rem;padding-top:calc(.9rem + env(safe-area-inset-top));
+  padding:.9rem 1rem;padding-top:calc(.9rem + var(--safe-top));
 }
 .panel-title{font-family:var(--serif);font-size:1.5rem;font-weight:900;letter-spacing:1px;}
 .panel-close{
@@ -386,7 +389,7 @@ body{
 .tabbar{
   position:fixed;left:0;right:0;bottom:0;display:flex;z-index:6;
   background:var(--surface);border-top:3px double var(--rule);
-  padding:.45rem .8rem calc(.45rem + env(safe-area-inset-bottom));
+  padding:.45rem .8rem calc(.45rem + var(--safe-bot));
 }
 .tab{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
@@ -404,7 +407,8 @@ body{
 /* ============ 断网全屏引导 ============ */
 .net-guide{
   position:fixed;inset:0;z-index:50;background:var(--paper);
-  display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  display:flex;align-items:center;justify-content:center;
+  padding:calc(1.5rem + var(--safe-top)) 1.5rem calc(1.5rem + var(--safe-bot));
 }
 .net-card{
   width:100%;max-width:28rem;background:var(--surface);

@@ -32,6 +32,19 @@ cd android
 - 手机上没有黑窗口 server.js：数据改由 `js/native-data.js` 用 Capacitor 的
   CapacitorHttp 原生抓取（绕 CORS、带 Referer、解压），逻辑与 server.js 一致。
 
+## 应用名 / 图标
+
+- 名字「晨起之时」：`capacitor.config.json` 的 `appName`（`cap add android` 时写进
+  `android/.../res/values/strings.xml` 的 app_name / title）。若 android/ 已存在，
+  改名后需手动同步那两个 string，或删 android/ 重新 `cap add`。
+- 图标源：`resources/icon.svg`（晨起日出，配色随报纸主题）。改图标流程：
+  改 svg → headless Chrome 渲成 `resources/icon.png`(1024) →
+  `npx @capacitor/assets generate --android` 生成各密度 → 重打包。
+- **关于「图标用当天天气+温度」**：安卓**不允许** app 把自己的桌面图标动态改成
+  实时天气/温度（系统没有这个能力，只能在固定几个预置图标间切，做不到任意温度）。
+  真要主屏看实时天气+温度，得另做**桌面小组件(App Widget)**，那是独立的安卓原生
+  开发，不在这个网页壳范围内。现在用的是契合「晨起之时」的静态图标。
+
 ## 没验证的（如实记录）
 
 debug APK 已成功构建、内部已含前端与原生数据层；`native-data.js` 的抓取/解析

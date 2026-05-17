@@ -1,6 +1,6 @@
 {
   "appId": "com.kkeist.weather4u",
-  "appName": "天气和新闻",
+  "appName": "晨起之时",
   "webDir": "www",
   "plugins": {
     "CapacitorHttp": { "enabled": true }

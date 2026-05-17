@@ -421,10 +421,19 @@
     return pad(h) + ':' + pad(d.getMinutes());
   }
   // 几月几号 + 星期几（老人一眼看清今天）
+  // 公历日期 + 星期 + 农历 + 当天节气/中国节日（像日历一样）
   function fmtDate(ms) {
     var d = new Date(ms);
     var wk = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + wk[d.getDay()];
+    var s = (d.getMonth() + 1) + '月' + d.getDate() + '日 ' + wk[d.getDay()];
+    try {
+      if (window.Lunar) {
+        var L = window.Lunar.today(d);
+        s += ' · 农历' + L.lunar;
+        if (L.label) s += ' · ' + L.label;   // 节日优先，否则节气
+      }
+    } catch (e) { /* 农历算不出不影响公历显示 */ }
+    return s;
   }
   // 图片统一走本机中转，避免源站防盗链/跨域，显示更稳
   function imgProxy(u) { return '/api/img?u=' + encodeURIComponent(u); }
