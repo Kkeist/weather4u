@@ -1,150 +1,193 @@
 /* ============================================================
-   老年天气新闻 · 设计系统
-   原则：移动优先；尺寸全用 rem + clamp 随屏/系统缩放，不写死 px；
-   高对比大字大点击区；日夜模式靠变量全覆盖；点击交互(tap)不依赖 hover。
+   老年天气新闻 · 全新手机端排版（v2 设计系统）
+   原则：移动优先；尺寸全 rem/clamp 随屏与系统缩放，不写死 px；
+   大字大点击区（≥44px）；点击(tap)不依赖 hover；
+   日夜全靠变量切换，无系统预设样式残留；统一间距/圆角/字阶。
    ============================================================ */
 :root{
-  /* 字号基准随视口流动，老人放大也跟着放大，且有合理上下限 */
-  font-size:clamp(17px, 4.4vw, 23px);
+  /* 老人基准字号，随视口流动，有上下限 */
+  font-size:clamp(17px, 4.6vw, 22px);
 
-  --bg:#eef1f6;
+  /* 间距阶梯：所有边距/间隙都从这里取，节奏统一 */
+  --s1:.35rem; --s2:.6rem; --s3:.9rem; --s4:1.2rem; --s5:1.6rem; --s6:2.2rem;
+  /* 圆角阶梯 */
+  --r-sm:.7rem; --r:1.15rem; --r-lg:1.5rem; --r-xl:2rem;
+  --maxw:34rem;                 /* 大屏居中不过宽 */
+
+  --bg:#eaeefb;
+  --bg-2:#f5f7fd;
   --card:#ffffff;
-  --ink:#1b2230;
-  --ink-soft:#5b6477;
-  --line:#e6e9f0;
-  --accent:#1f6fd6;
-  --accent-soft:#e9f1fc;
-  --chip:#eef3fb;
-  --tap:rgba(31,111,214,.12);
-  --warn-bg:#fff4e3;
-  --warn-ink:#9a5300;
-  --warn-line:#ffcd86;
-  --hero-1:#3a8ee6;          /* 白天天空渐变 */
-  --hero-2:#6fb3f2;
+  --ink:#161d2e;
+  --ink-soft:#6a7286;
+  --line:#e7eaf3;
+  --accent:#2f6df0;
+  --accent-ink:#ffffff;
+  --accent-soft:#e9f0fe;
+  --chip:#eef2fb;
+  --tap:rgba(47,109,240,.12);
+  --good:#1ba672;
+  --warn-bg:#fff3e0;
+  --warn-ink:#9a5a00;
+  --warn-line:#ffce86;
+
+  --hero-1:#4f8ef2;             /* 白天天空：上深下浅 + 一点紫调 */
+  --hero-2:#6aa6f5;
+  --hero-3:#86c0f8;
   --hero-ink:#ffffff;
-  --shadow:0 6px 20px rgba(20,30,55,.08);
-  --radius:1.25rem;
-  --gap:1rem;
-  --maxw:36rem;              /* 大屏时内容居中不拉太宽 */
+  --glass:rgba(255,255,255,.17);
+  --glass-strong:rgba(255,255,255,.30);
+
+  --shadow:0 8px 24px rgba(23,33,64,.10);
+  --shadow-sm:0 3px 12px rgba(23,33,64,.07);
 }
 body.dark{
-  --bg:#0e1320;
-  --card:#171e2d;
-  --ink:#eef1f7;
-  --ink-soft:#9aa4ba;
-  --line:#27303f;
-  --accent:#5aa6ee;
-  --accent-soft:#1a2740;
-  --chip:#1e283a;
-  --tap:rgba(120,170,235,.18);
+  --bg:#0a0e18;
+  --bg-2:#0f1422;
+  --card:#161d2c;
+  --ink:#eef2f8;
+  --ink-soft:#94a0b8;
+  --line:#262f40;
+  --accent:#5fa0f5;
+  --accent-ink:#06121f;
+  --accent-soft:#16263f;
+  --chip:#1b2434;
+  --tap:rgba(120,170,235,.20);
+  --good:#3fcf9a;
   --warn-bg:#3a2a12;
   --warn-ink:#ffc680;
   --warn-line:#6f4e1c;
-  --hero-1:#16233d;
-  --hero-2:#243a5e;
-  --shadow:0 6px 20px rgba(0,0,0,.35);
+
+  --hero-1:#16243f;
+  --hero-2:#1f3252;
+  --hero-3:#284065;
+  --glass:rgba(255,255,255,.10);
+  --glass-strong:rgba(255,255,255,.18);
+
+  --shadow:0 8px 26px rgba(0,0,0,.40);
+  --shadow-sm:0 3px 12px rgba(0,0,0,.32);
 }
 
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
-/* hidden 属性必须真隐藏，盖过任何自定义 display */
-[hidden]{display:none !important;}
-
+[hidden]{display:none !important;}            /* hidden 必须真隐藏，盖过任何 display */
 html,body{min-height:100%;}
 body{
-  background:var(--bg);color:var(--ink);
+  background:linear-gradient(180deg,var(--bg),var(--bg-2));
+  color:var(--ink);
   font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
   line-height:1.55;-webkit-font-smoothing:antialiased;
   transition:background .25s,color .25s;
 }
+::selection{background:var(--tap);}
 
-/* 每页：移动优先，单列；大屏时居中限宽；底部留出标签栏空间 */
+/* 每页：移动优先单列，大屏居中限宽，底部给标签栏留空 */
 .page{
   width:100%;max-width:var(--maxw);margin:0 auto;
-  padding:0 var(--gap) calc(6.6rem + env(safe-area-inset-bottom));
+  padding:0 var(--s4) calc(6.8rem + env(safe-area-inset-bottom));
 }
 
-/* ---------- 天气大头 ---------- */
+/* ============ 天气大头 ============ */
 .hero{
-  margin:0 calc(-1 * var(--gap));
-  padding:calc(1.1rem + env(safe-area-inset-top)) var(--gap) 1.8rem;
-  background:linear-gradient(160deg,var(--hero-1),var(--hero-2));
+  position:relative;
+  margin:0 calc(-1 * var(--s4)) 0;
+  padding:calc(1.2rem + env(safe-area-inset-top)) var(--s4) 2.4rem;
+  background:linear-gradient(165deg,var(--hero-1) 0%,var(--hero-2) 55%,var(--hero-3) 100%);
   color:var(--hero-ink);
-  border-radius:0 0 1.8rem 1.8rem;
+  border-radius:0 0 var(--r-xl) var(--r-xl);
+  box-shadow:var(--shadow);
 }
-.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.7rem;}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s3);}
 .city-btn{
-  display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0;
+  display:flex;flex-direction:column;align-items:flex-start;gap:.25rem;min-width:0;
   background:none;border:none;color:var(--hero-ink);cursor:pointer;
   padding:.3rem .1rem;min-height:2.8rem;text-align:left;
 }
 #cityName{
-  font-size:1.8rem;font-weight:800;line-height:1.15;
+  font-size:1.85rem;font-weight:800;line-height:1.12;letter-spacing:.5px;
   max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.city-hint{font-size:.82rem;opacity:.9;}
+.city-hint{
+  font-size:.84rem;font-weight:600;opacity:.9;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 .hero-ctrls{display:flex;gap:.5rem;flex:0 0 auto;}
 .icon-btn{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;
-  color:var(--hero-ink);background:rgba(255,255,255,.18);
+  color:var(--hero-ink);background:var(--glass);
   border:none;border-radius:1.1rem;cursor:pointer;
   width:3.5rem;min-height:3.5rem;padding:.45rem .2rem;
+  transition:background .15s;
 }
-.icon-btn:active{background:rgba(255,255,255,.34);}
+.icon-btn:active{background:var(--glass-strong);}
 .icon-btn-ic{width:1.5rem;height:1.5rem;display:block;}
 .icon-btn-ic svg{width:100%;height:100%;display:block;}
 .icon-btn-tx{font-size:.72rem;font-weight:700;line-height:1;white-space:nowrap;}
 
-.hero-date{margin-top:1rem;font-size:1.1rem;font-weight:700;opacity:.95;letter-spacing:.3px;}
+.hero-date{margin-top:1.1rem;font-size:1.05rem;font-weight:600;opacity:.95;letter-spacing:.4px;}
 
-/* 当前天气：大温度 + 图标 + 天气/温差，整体垂直居中对齐不挤 */
-.hero-now{display:flex;align-items:center;gap:1rem;margin:1.1rem 0 .2rem;flex-wrap:wrap;}
-.now-icon{font-size:3.6rem;line-height:1;flex:0 0 auto;}
-.now-temp{font-size:clamp(3.4rem,16vw,5rem);font-weight:800;line-height:1;letter-spacing:-2px;flex:0 0 auto;}
-.now-side{display:flex;flex-direction:column;gap:.35rem;min-width:0;flex:1 1 auto;}
-.now-desc{font-size:1.45rem;font-weight:800;line-height:1.1;}
-.now-range{font-size:1rem;font-weight:600;opacity:.92;}
+/* 当前天气主视觉：温度最大，图标在侧，天气与温差竖排 */
+.hero-now{
+  display:flex;align-items:center;gap:1.1rem;flex-wrap:wrap;
+  margin:.6rem 0 1.4rem;
+}
+.now-icon{font-size:4rem;line-height:1;flex:0 0 auto;
+  filter:drop-shadow(0 4px 10px rgba(0,0,0,.18));}
+.now-temp{
+  font-size:clamp(4rem,21vw,6rem);font-weight:800;line-height:.92;
+  letter-spacing:-3px;flex:0 0 auto;
+}
+.now-side{display:flex;flex-direction:column;gap:.3rem;min-width:0;flex:1 1 auto;}
+.now-desc{font-size:1.5rem;font-weight:800;line-height:1.1;}
+.now-range{font-size:1.02rem;font-weight:600;opacity:.92;}
 
-/* 四项数据：等高方块，内容垂直居中，风力换行也整齐不破相 */
+/* 四项数据：一块磨砂玻璃面板，四等分，竖向居中 */
 .hero-stats{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-top:1.3rem;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  background:var(--glass);border-radius:var(--r);
+  padding:.5rem;
 }
 .stat{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
-  min-height:4.6rem;background:rgba(255,255,255,.16);border-radius:1rem;
-  padding:.7rem .3rem;text-align:center;
+  min-height:4.4rem;padding:.55rem .25rem;text-align:center;position:relative;
 }
-.stat-label{font-size:.8rem;opacity:.82;}
-.stat-val{font-size:clamp(.92rem,3.7vw,1.08rem);font-weight:800;line-height:1.22;word-break:keep-all;}
+.stat + .stat::before{
+  content:"";position:absolute;left:0;top:18%;height:64%;width:1px;
+  background:rgba(255,255,255,.22);
+}
+.stat-label{font-size:.78rem;font-weight:600;opacity:.85;}
+.stat-val{font-size:clamp(.92rem,3.7vw,1.08rem);font-weight:800;line-height:1.2;word-break:keep-all;}
 .stat-val span{display:block;}
 .hero-tip{
-  margin-top:1rem;background:rgba(255,255,255,.18);border-radius:.9rem;
-  padding:.7rem 1rem;font-size:1rem;font-weight:600;
+  margin-top:1.1rem;background:var(--glass-strong);border-radius:var(--r-sm);
+  padding:.75rem 1rem;font-size:1rem;font-weight:700;
 }
-.hero-updated{display:block;margin-top:1.1rem;font-size:.78rem;opacity:.72;}
+.hero-updated{display:block;margin-top:1rem;font-size:.78rem;opacity:.72;text-align:right;}
 
-/* ---------- 通用卡片 ---------- */
+/* ============ 通用区块 ============ */
 .card{
-  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
-  padding:1.2rem 1.15rem 1.3rem;margin-top:1.1rem;
+  background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
+  padding:var(--s4) var(--s4) var(--s5);margin-top:var(--s5);
 }
-.card-title{font-size:1.25rem;font-weight:800;margin-bottom:1rem;letter-spacing:.3px;}
+.card-title{
+  font-size:1.22rem;font-weight:800;margin-bottom:var(--s4);
+  padding-left:.7rem;border-left:.28rem solid var(--accent);line-height:1.2;
+}
 
 /* 天气预警 */
 .alert-box{
-  background:var(--warn-bg);border:2px solid var(--warn-line);color:var(--warn-ink);
-  border-radius:var(--radius);padding:1rem 1.1rem;margin-top:var(--gap);
+  background:var(--warn-bg);border:1.5px solid var(--warn-line);color:var(--warn-ink);
+  border-radius:var(--r-lg);padding:var(--s4);margin-top:var(--s5);
 }
-.alert-item{display:flex;gap:.6rem;align-items:flex-start;}
-.alert-item + .alert-item{margin-top:.7rem;padding-top:.7rem;border-top:1px dashed var(--warn-line);}
-.alert-emoji{font-size:1.5rem;line-height:1.2;flex:0 0 auto;}
-.alert-title{font-size:1.1rem;font-weight:800;}
-.alert-text{font-size:.98rem;margin-top:.2rem;}
+.alert-item{display:flex;gap:.7rem;align-items:flex-start;}
+.alert-item + .alert-item{margin-top:.8rem;padding-top:.8rem;border-top:1px dashed var(--warn-line);}
+.alert-emoji{font-size:1.6rem;line-height:1.1;flex:0 0 auto;}
+.alert-title{font-size:1.12rem;font-weight:800;}
+.alert-text{font-size:.98rem;margin-top:.25rem;line-height:1.6;}
 
-/* ---------- 逐小时折线图 ---------- */
-.hourly-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -.3rem;}
-.hourly-scroll svg{height:clamp(11rem,42vw,14rem);width:auto;display:block;}
+/* ============ 逐小时折线图 ============ */
+.hourly-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -.4rem;padding:0 .4rem;}
+.hourly-scroll svg{height:clamp(11.5rem,44vw,14.5rem);width:auto;display:block;}
 .ht-area{fill:url(#htgrad);}
-#htgrad .g1{stop-color:var(--accent);stop-opacity:.28;}
+#htgrad .g1{stop-color:var(--accent);stop-opacity:.30;}
 #htgrad .g2{stop-color:var(--accent);stop-opacity:0;}
 .ht-line{stroke:var(--accent);fill:none;}
 .ht-dot{fill:var(--card);stroke:var(--accent);}
@@ -153,201 +196,211 @@ body{
 .ht-wx{fill:var(--ink);font-weight:700;}
 .ht-sub{fill:var(--ink-soft);}
 
-/* ---------- 本周天气：每天一小列横排在同一个框里 ---------- */
+/* ============ 本周天气：横排日卡 ============ */
 .week{
-  display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  margin:0 -.3rem;padding:.1rem .3rem;
+  display:flex;gap:.55rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 -.4rem;padding:.15rem .4rem;
 }
 .day-col{
-  flex:1 0 auto;min-width:4.4rem;
+  flex:1 0 auto;min-width:4.6rem;
   display:flex;flex-direction:column;align-items:center;gap:.5rem;
-  background:var(--chip);border-radius:1.1rem;padding:1rem .45rem;text-align:center;
+  background:linear-gradient(180deg,var(--chip),var(--card));
+  border:1px solid var(--line);
+  border-radius:var(--r);padding:1rem .5rem;text-align:center;
 }
 .day-name{font-size:1.05rem;font-weight:800;}
 .day-icon{font-size:2.1rem;line-height:1;}
 .day-desc{
-  font-size:.78rem;color:var(--ink-soft);
+  font-size:.76rem;color:var(--ink-soft);
   max-width:5.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.day-hi{font-size:1.3rem;font-weight:800;line-height:1.1;}
+.day-hi{font-size:1.32rem;font-weight:800;line-height:1.1;}
 .day-lo{font-size:1.05rem;font-weight:700;line-height:1.1;color:var(--ink-soft);}
 .day-hi .lab,.day-lo .lab{
-  display:block;font-size:.64rem;font-weight:700;letter-spacing:.5px;
-  opacity:.7;margin-bottom:.05rem;
+  display:block;font-size:.64rem;font-weight:700;letter-spacing:.6px;
+  opacity:.65;margin-bottom:.05rem;
 }
 .day-air{
-  font-size:.7rem;color:var(--accent);font-weight:700;
-  background:var(--accent-soft);border-radius:.5rem;padding:.12rem .45rem;
+  font-size:.7rem;color:var(--accent);font-weight:800;
+  background:var(--accent-soft);border-radius:999px;padding:.14rem .55rem;
 }
 
-/* ---------- 新闻分类筛选条 ---------- */
+/* ============ 新闻分类筛选 ============ */
 .news-filter{
   display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  margin:0 -.3rem;padding:var(--gap) .3rem .2rem;
+  margin:0 calc(-1 * var(--s4));padding:var(--s4) var(--s4) .4rem;
 }
 .news-filter:empty{display:none;}
+.news-filter::-webkit-scrollbar{display:none;}
 .news-chip{
   flex:0 0 auto;font:inherit;font-size:1rem;font-weight:700;
   color:var(--ink-soft);background:var(--card);
-  border:1px solid var(--line);border-radius:999px;
-  padding:.55rem 1.15rem;min-height:2.9rem;cursor:pointer;white-space:nowrap;
+  border:1.5px solid var(--line);border-radius:999px;
+  padding:.55rem 1.2rem;min-height:2.9rem;cursor:pointer;white-space:nowrap;
+  transition:background .15s,color .15s,border-color .15s;
 }
 .news-chip:active{background:var(--tap);}
-.news-chip.on{color:#fff;background:var(--accent);border-color:var(--accent);}
+.news-chip.on{color:var(--accent-ink);background:var(--accent);border-color:var(--accent);}
 
-/* ---------- 新闻列表 ---------- */
-.news-list{display:flex;flex-direction:column;gap:.85rem;padding-top:.5rem;}
-/* 图在上、大字标题在下：老人更易读，标题不再被挤窄 */
+/* ============ 新闻列表 ============ */
+.news-list{display:flex;flex-direction:column;gap:var(--s4);padding-top:.5rem;}
 .news-card{
   display:flex;flex-direction:column;width:100%;text-align:left;font:inherit;cursor:pointer;
-  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
-  box-shadow:var(--shadow);overflow:hidden;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);overflow:hidden;color:var(--ink);
+  transition:transform .12s;
 }
-.news-card:active{background:var(--tap);}
+.news-card:active{transform:scale(.985);background:var(--tap);}
 .news-thumb{
   width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--chip);display:block;
 }
-.news-body{display:flex;flex-direction:column;padding:1rem 1.1rem;}
+.news-body{display:flex;flex-direction:column;padding:var(--s4);}
 .news-cat{
-  display:inline-block;align-self:flex-start;font-size:.82rem;color:var(--accent);
-  background:var(--accent-soft);border-radius:.5rem;padding:.2rem .6rem;margin-bottom:.55rem;
+  display:inline-block;align-self:flex-start;font-size:.8rem;font-weight:700;
+  color:var(--accent);background:var(--accent-soft);
+  border-radius:999px;padding:.22rem .7rem;margin-bottom:.6rem;
 }
 .news-title{font-size:1.3rem;font-weight:800;line-height:1.45;}
-.news-meta{font-size:.9rem;color:var(--ink-soft);margin-top:.6rem;}
+.news-meta{font-size:.9rem;color:var(--ink-soft);margin-top:.65rem;}
 
 /* 看更早的新闻 */
-.news-more{padding:.2rem 0 calc(1rem + env(safe-area-inset-bottom));}
+.news-more{padding:var(--s4) 0 calc(1rem + env(safe-area-inset-bottom));}
 .news-more:empty{display:none;}
 .news-more-btn{
   width:100%;font:inherit;font-size:1.15rem;font-weight:800;
   color:var(--accent);background:var(--card);
-  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
-  padding:1rem;min-height:3.4rem;cursor:pointer;
+  border:1.5px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm);
+  padding:1.05rem;min-height:3.4rem;cursor:pointer;
 }
 .news-more-btn:active{background:var(--tap);}
-.news-more-tip{text-align:center;color:var(--ink-soft);font-size:1rem;padding:1rem;}
+.news-more-tip{text-align:center;color:var(--ink-soft);font-size:1rem;padding:1.1rem;}
 
 /* 状态提示 */
-.state-msg{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.4rem 1rem;}
+.state-msg{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.6rem 1rem;line-height:1.7;}
 .state-msg button{
-  margin-top:1rem;font-size:1.05rem;color:#fff;background:var(--accent);
-  border:none;border-radius:.8rem;padding:.75rem 1.5rem;min-height:3rem;cursor:pointer;
+  display:block;margin:1.1rem auto 0;font:inherit;font-size:1.05rem;font-weight:800;
+  color:var(--accent-ink);background:var(--accent);
+  border:none;border-radius:var(--r);padding:.8rem 1.7rem;min-height:3rem;cursor:pointer;
 }
 
-/* ---------- 阅读页（图文，在 app 内读完） ---------- */
-.reader{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;}
+/* ============ 阅读页 ============ */
+.reader{position:fixed;inset:0;background:var(--bg-2);z-index:20;display:flex;flex-direction:column;}
 .reader-bar{
   background:var(--card);border-bottom:1px solid var(--line);
   padding:.6rem .7rem;padding-top:calc(.6rem + env(safe-area-inset-top));
 }
 .reader-back{
   display:flex;align-items:center;gap:.4rem;background:none;border:none;
-  color:var(--accent);font-size:1.2rem;font-weight:800;cursor:pointer;
-  padding:.5rem .6rem;border-radius:.6rem;min-height:3.2rem;
+  color:var(--accent);font:inherit;font-size:1.2rem;font-weight:800;cursor:pointer;
+  padding:.5rem .7rem;border-radius:var(--r-sm);min-height:3.2rem;
 }
 .reader-back:active{background:var(--tap);}
-.back-arrow{width:1.6rem;height:1.6rem;display:inline-block;}
+.back-arrow{width:1.5rem;height:1.5rem;display:inline-block;}
 .reader-body{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;
   max-width:var(--maxw);margin:0 auto;
-  padding:1.2rem 1.2rem calc(2.4rem + env(safe-area-inset-bottom));
+  padding:var(--s5) var(--s5) calc(2.6rem + env(safe-area-inset-bottom));
 }
 .reader-cat{
-  display:inline-block;font-size:.85rem;color:var(--accent);
-  background:var(--accent-soft);border-radius:.5rem;padding:.2rem .6rem;
+  display:inline-block;font-size:.85rem;font-weight:700;color:var(--accent);
+  background:var(--accent-soft);border-radius:999px;padding:.22rem .7rem;
 }
-.reader-title{font-size:1.7rem;font-weight:800;line-height:1.4;margin:.8rem 0 .5rem;}
+.reader-title{font-size:1.75rem;font-weight:800;line-height:1.4;margin:.9rem 0 .5rem;}
 .reader-meta{
-  font-size:.95rem;color:var(--ink-soft);margin-bottom:1.2rem;
+  font-size:.95rem;color:var(--ink-soft);margin-bottom:1.3rem;
   border-bottom:1px solid var(--line);padding-bottom:1rem;
 }
-.reader-body p{font-size:1.22rem;line-height:1.95;margin-bottom:1.15rem;}
+.reader-body p{font-size:1.22rem;line-height:2;margin-bottom:1.2rem;}
 .reader-body img{
-  display:block;width:100%;height:auto;border-radius:.9rem;
-  margin:.4rem 0 1.2rem;background:var(--chip);
+  display:block;width:100%;height:auto;border-radius:var(--r);
+  margin:.5rem 0 1.3rem;background:var(--chip);
 }
 .reader-loading{color:var(--ink-soft);}
 
-/* ---------- 换城市面板 ---------- */
-.panel{position:fixed;inset:0;background:var(--bg);z-index:25;display:flex;flex-direction:column;}
+/* ============ 换城市面板 ============ */
+.panel{position:fixed;inset:0;background:var(--bg-2);z-index:25;display:flex;flex-direction:column;}
 .panel-bar{
   display:flex;align-items:center;justify-content:space-between;
   background:var(--card);border-bottom:1px solid var(--line);
   padding:.9rem 1rem;padding-top:calc(.9rem + env(safe-area-inset-top));
 }
-.panel-title{font-size:1.35rem;font-weight:800;}
+.panel-title{font-size:1.4rem;font-weight:800;}
 .panel-close{
-  font-size:1.1rem;font-weight:700;color:var(--accent);background:var(--chip);
-  border:none;border-radius:.6rem;padding:.6rem 1.1rem;min-height:3.2rem;cursor:pointer;
+  font:inherit;font-size:1.1rem;font-weight:800;color:var(--accent);background:var(--chip);
+  border:none;border-radius:var(--r-sm);padding:.6rem 1.2rem;min-height:3.2rem;cursor:pointer;
 }
-.city-search{padding:1rem var(--gap) .4rem;}
+.panel-close:active{background:var(--tap);}
+.city-search{padding:var(--s4) var(--s4) .5rem;}
 .city-input{
   width:100%;font:inherit;font-size:1.2rem;color:var(--ink);
-  background:var(--card);border:2px solid var(--line);border-radius:.9rem;
-  padding:.85rem 1rem;min-height:3.4rem;outline:none;
+  background:var(--card);border:2px solid var(--line);border-radius:var(--r);
+  padding:.9rem 1.1rem;min-height:3.5rem;outline:none;
+  transition:border-color .15s;
 }
 .city-input::placeholder{color:var(--ink-soft);}
 .city-input:focus{border-color:var(--accent);}
-.city-note{margin-top:.55rem;font-size:.92rem;line-height:1.5;color:var(--ink-soft);}
+.city-note{margin-top:.6rem;font-size:.92rem;line-height:1.55;color:var(--ink-soft);}
 .city-note[hidden]{display:none;}
 .city-results{
   flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;
-  padding:.6rem var(--gap) calc(2rem + env(safe-area-inset-bottom));
+  padding:.5rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
 }
 .city-row{
-  display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;
+  display:flex;flex-direction:column;align-items:flex-start;gap:.18rem;
   width:100%;text-align:left;font:inherit;cursor:pointer;
   color:var(--ink);background:var(--card);
-  border:1px solid var(--line);border-radius:.9rem;
-  padding:.9rem 1.1rem;min-height:3.8rem;
+  border:1px solid var(--line);border-radius:var(--r);
+  padding:.95rem 1.15rem;min-height:3.8rem;
 }
 .city-row:active{background:var(--tap);}
 .city-row-name{font-size:1.25rem;font-weight:800;}
 .city-row-sub{font-size:.9rem;color:var(--ink-soft);}
-.city-tip{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2rem 1rem;}
+.city-tip{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.2rem 1rem;line-height:1.7;}
 .city-grid{
   flex:1;overflow-y:auto;display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(6.5rem,1fr));gap:.7rem;
-  padding:.6rem var(--gap) calc(2rem + env(safe-area-inset-bottom));
+  grid-template-columns:repeat(auto-fill,minmax(6.4rem,1fr));gap:.7rem;
+  padding:.5rem var(--s4) calc(2rem + env(safe-area-inset-bottom));
 }
 .city-opt{
-  font-size:1.2rem;font-weight:700;color:var(--ink);background:var(--card);
-  border:1px solid var(--line);border-radius:.9rem;padding:1rem .4rem;
+  font:inherit;font-size:1.18rem;font-weight:700;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:var(--r);padding:1rem .4rem;
   min-height:3.8rem;cursor:pointer;
 }
 .city-opt:active{background:var(--tap);}
 
-/* ---------- 底部标签栏 ---------- */
+/* ============ 底部标签栏 ============ */
 .tabbar{
-  position:fixed;left:0;right:0;bottom:0;display:flex;z-index:6;
+  position:fixed;left:0;right:0;bottom:0;display:flex;z-index:6;gap:.4rem;
   background:var(--card);border-top:1px solid var(--line);
-  padding-bottom:env(safe-area-inset-bottom);
+  padding:.5rem .8rem calc(.5rem + env(safe-area-inset-bottom));
+  box-shadow:0 -4px 18px rgba(23,33,64,.06);
 }
 .tab{
-  flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
   background:none;border:none;color:var(--ink-soft);
-  padding:.7rem 0;min-height:5rem;cursor:pointer;font-size:1rem;font-weight:700;
+  padding:.6rem 0;min-height:4.4rem;cursor:pointer;font:inherit;font-size:1rem;font-weight:700;
+  border-radius:var(--r);transition:color .15s,background .15s;
 }
-.tab-icon{width:1.9rem;height:1.9rem;}
+.tab-icon{width:1.85rem;height:1.85rem;}
 .tab:active{background:var(--tap);}
-.tab-active{color:var(--accent);}
+.tab-active{color:var(--accent);background:var(--accent-soft);}
 
-/* 连不上服务的全屏引导：盖住一切，最高层，大字人话 */
+/* ============ 断网全屏引导 ============ */
 .net-guide{
-  position:fixed;inset:0;z-index:50;background:var(--bg);
-  display:flex;align-items:center;justify-content:center;padding:1.4rem;
+  position:fixed;inset:0;z-index:50;background:linear-gradient(180deg,var(--bg),var(--bg-2));
+  display:flex;align-items:center;justify-content:center;padding:1.5rem;
 }
 .net-card{
-  width:100%;max-width:30rem;background:var(--card);border-radius:var(--radius);
-  box-shadow:var(--shadow);padding:2rem 1.5rem;text-align:center;
+  width:100%;max-width:28rem;background:var(--card);border-radius:var(--r-xl);
+  box-shadow:var(--shadow);padding:2.2rem 1.6rem;text-align:center;
 }
-.net-emoji{font-size:3.4rem;line-height:1;}
-.net-title{font-size:1.6rem;font-weight:800;margin:1rem 0 .8rem;}
-.net-msg{font-size:1.18rem;line-height:1.8;color:var(--ink-soft);text-align:left;}
+.net-emoji{font-size:3.6rem;line-height:1;}
+.net-title{font-size:1.6rem;font-weight:800;margin:1.1rem 0 .9rem;}
+.net-msg{font-size:1.16rem;line-height:1.85;color:var(--ink-soft);text-align:left;}
 .net-msg b{color:var(--ink);}
 .net-btn{
-  margin-top:1.5rem;width:100%;font-size:1.2rem;font-weight:800;color:#fff;
-  background:var(--accent);border:none;border-radius:.9rem;
-  padding:1rem;min-height:3.6rem;cursor:pointer;
+  margin-top:1.6rem;width:100%;font:inherit;font-size:1.2rem;font-weight:800;
+  color:var(--accent-ink);background:var(--accent);border:none;border-radius:var(--r);
+  padding:1.05rem;min-height:3.6rem;cursor:pointer;
 }
 .net-btn:active{opacity:.85;}
