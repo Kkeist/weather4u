@@ -65,14 +65,8 @@
     var today = w.daily && w.daily[0];
     $('nowRange').textContent = today ? ('最高 ' + today.max + '°  最低 ' + today.min + '°') : '';
 
-    // 下雨提示：免费数据源没有「降水概率%」，不编百分比；
-    // 用官方雨伞指数（会不会下雨、要不要带伞的权威说法）+ 正在下雨实况
-    var tip = '';
-    if (c.rain > 0) tip = '现在正在下雨，出门记得带伞。';
-    else if (w.umbrella) tip = w.umbrella;
-    else if (/雨|雷/.test(c.desc)) tip = '有雨，出门记得带伞。';
-    var np = $('nowPop');
-    if (tip) { np.textContent = tip; np.hidden = false; } else { np.hidden = true; }
+    // 下雨信息按天融进「本周天气」（见下），大头不再放整块红条
+    $('nowPop').hidden = true;
 
     var box = $('alertBox');
     if (w.alerts && w.alerts.length) {
@@ -89,11 +83,17 @@
     // 每天一小列横排在同一个框里；最高/最低写出文字，不只是两个数字
     $('dailyList').innerHTML = w.daily.map(function (d) {
       var air = d.aqiName ? '<div class="day-air">空气' + esc(d.aqiName) + '</div>' : '';
+      // 免费数据源没有「降水概率%」，不编数字；按天如实标出会不会下雨/雪/雷
+      var ds = String(d.desc || '');
+      var rain = /雪/.test(ds) ? '有雪' : /雷/.test(ds) ? '有雷雨' : /雨/.test(ds) ? '有雨' : '';
+      var wet = rain ? ' wet' : '';
+      var rainTag = rain ? '<div class="day-rain">' + rain + '</div>' : '';
       return '<div class="day-col">' +
                '<div class="day-name">' + esc(d.day) + '</div>' +
                '<div class="day-date">' + esc(d.date || '') + '</div>' +
                '<div class="day-icon">' + WeatherIcons.emoji(d.type) + '</div>' +
-               '<div class="day-desc">' + esc(d.desc) + '</div>' +
+               '<div class="day-desc' + wet + '">' + esc(d.desc) + '</div>' +
+               rainTag +
                '<div class="day-hi"><span class="lab">最高</span>' + d.max + '°</div>' +
                '<div class="day-lo"><span class="lab">最低</span>' + d.min + '°</div>' +
                air +

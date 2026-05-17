@@ -166,10 +166,7 @@ body{
 .stat-label{font-size:.76rem;font-weight:700;color:var(--ink-soft);letter-spacing:1px;}
 .stat-val{font-family:var(--serif);font-size:clamp(1rem,3.9vw,1.2rem);font-weight:800;line-height:1.18;word-break:keep-all;}
 .stat-val span{display:block;}
-.hero-tip{
-  margin-top:var(--s4);background:var(--accent);color:var(--accent-ink);
-  border-radius:var(--r);padding:.8rem 1.05rem;font-size:1.02rem;font-weight:800;letter-spacing:.5px;
-}
+.hero-tip{display:none;}   /* 大头不再放整块红条，下雨信息按天融进本周 */
 .hero-updated{
   display:block;margin-top:var(--s3);font-size:.76rem;color:var(--ink-soft);
   text-align:right;letter-spacing:1px;
@@ -236,6 +233,8 @@ body{
   font-size:.74rem;color:var(--ink-soft);
   max-width:5.6rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
+.day-desc.wet{color:var(--accent);font-weight:800;}
+.day-rain{font-size:.72rem;color:var(--accent);font-weight:900;letter-spacing:.5px;}
 .day-hi{font-family:var(--serif);font-size:1.4rem;font-weight:900;line-height:1.05;color:var(--accent);}
 .day-lo{font-family:var(--serif);font-size:1.08rem;font-weight:800;line-height:1.1;color:var(--ink-soft);}
 .day-hi .lab,.day-lo .lab{
