@@ -88,6 +88,7 @@
       var air = d.aqiName ? '<div class="day-air">空气' + esc(d.aqiName) + '</div>' : '';
       return '<div class="day-col">' +
                '<div class="day-name">' + esc(d.day) + '</div>' +
+               '<div class="day-date">' + esc(d.date || '') + '</div>' +
                '<div class="day-icon">' + WeatherIcons.emoji(d.type) + '</div>' +
                '<div class="day-desc">' + esc(d.desc) + '</div>' +
                '<div class="day-hi"><span class="lab">最高</span>' + d.max + '°</div>' +

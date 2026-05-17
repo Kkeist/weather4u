@@ -182,6 +182,7 @@ async function buildWeather(sel, located) {
     .slice(0, 7)
     .map((x, i) => ({
       day: i === 0 ? '今天' : i === 1 ? '明天' : i === 2 ? '后天' : weekday(x.time),
+      date: parseInt(x.time.slice(5, 7), 10) + '月' + parseInt(x.time.slice(8, 10), 10) + '日',
       type: weatherType(x.day_weather_short || x.day_weather),
       desc: x.day_weather_short || x.day_weather,
       max: parseInt(x.max_degree, 10),
