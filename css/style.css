@@ -1,0 +1,353 @@
+/* ============================================================
+   老年天气新闻 · 设计系统
+   原则：移动优先；尺寸全用 rem + clamp 随屏/系统缩放，不写死 px；
+   高对比大字大点击区；日夜模式靠变量全覆盖；点击交互(tap)不依赖 hover。
+   ============================================================ */
+:root{
+  /* 字号基准随视口流动，老人放大也跟着放大，且有合理上下限 */
+  font-size:clamp(17px, 4.4vw, 23px);
+
+  --bg:#eef1f6;
+  --card:#ffffff;
+  --ink:#1b2230;
+  --ink-soft:#5b6477;
+  --line:#e6e9f0;
+  --accent:#1f6fd6;
+  --accent-soft:#e9f1fc;
+  --chip:#eef3fb;
+  --tap:rgba(31,111,214,.12);
+  --warn-bg:#fff4e3;
+  --warn-ink:#9a5300;
+  --warn-line:#ffcd86;
+  --hero-1:#3a8ee6;          /* 白天天空渐变 */
+  --hero-2:#6fb3f2;
+  --hero-ink:#ffffff;
+  --shadow:0 6px 20px rgba(20,30,55,.08);
+  --radius:1.25rem;
+  --gap:1rem;
+  --maxw:36rem;              /* 大屏时内容居中不拉太宽 */
+}
+body.dark{
+  --bg:#0e1320;
+  --card:#171e2d;
+  --ink:#eef1f7;
+  --ink-soft:#9aa4ba;
+  --line:#27303f;
+  --accent:#5aa6ee;
+  --accent-soft:#1a2740;
+  --chip:#1e283a;
+  --tap:rgba(120,170,235,.18);
+  --warn-bg:#3a2a12;
+  --warn-ink:#ffc680;
+  --warn-line:#6f4e1c;
+  --hero-1:#16233d;
+  --hero-2:#243a5e;
+  --shadow:0 6px 20px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+/* hidden 属性必须真隐藏，盖过任何自定义 display */
+[hidden]{display:none !important;}
+
+html,body{min-height:100%;}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  line-height:1.55;-webkit-font-smoothing:antialiased;
+  transition:background .25s,color .25s;
+}
+
+/* 每页：移动优先，单列；大屏时居中限宽；底部留出标签栏空间 */
+.page{
+  width:100%;max-width:var(--maxw);margin:0 auto;
+  padding:0 var(--gap) calc(6.6rem + env(safe-area-inset-bottom));
+}
+
+/* ---------- 天气大头 ---------- */
+.hero{
+  margin:0 calc(-1 * var(--gap));
+  padding:calc(1.1rem + env(safe-area-inset-top)) var(--gap) 1.8rem;
+  background:linear-gradient(160deg,var(--hero-1),var(--hero-2));
+  color:var(--hero-ink);
+  border-radius:0 0 1.8rem 1.8rem;
+}
+.hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:.7rem;}
+.city-btn{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.2rem;min-width:0;
+  background:none;border:none;color:var(--hero-ink);cursor:pointer;
+  padding:.3rem .1rem;min-height:2.8rem;text-align:left;
+}
+#cityName{
+  font-size:1.8rem;font-weight:800;line-height:1.15;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.city-hint{font-size:.82rem;opacity:.9;}
+.hero-ctrls{display:flex;gap:.5rem;flex:0 0 auto;}
+.icon-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;
+  color:var(--hero-ink);background:rgba(255,255,255,.18);
+  border:none;border-radius:1.1rem;cursor:pointer;
+  width:3.5rem;min-height:3.5rem;padding:.45rem .2rem;
+}
+.icon-btn:active{background:rgba(255,255,255,.34);}
+.icon-btn-ic{width:1.5rem;height:1.5rem;display:block;}
+.icon-btn-ic svg{width:100%;height:100%;display:block;}
+.icon-btn-tx{font-size:.72rem;font-weight:700;line-height:1;white-space:nowrap;}
+
+.hero-date{margin-top:1rem;font-size:1.1rem;font-weight:700;opacity:.95;letter-spacing:.3px;}
+
+/* 当前天气：大温度 + 图标 + 天气/温差，整体垂直居中对齐不挤 */
+.hero-now{display:flex;align-items:center;gap:1rem;margin:1.1rem 0 .2rem;flex-wrap:wrap;}
+.now-icon{font-size:3.6rem;line-height:1;flex:0 0 auto;}
+.now-temp{font-size:clamp(3.4rem,16vw,5rem);font-weight:800;line-height:1;letter-spacing:-2px;flex:0 0 auto;}
+.now-side{display:flex;flex-direction:column;gap:.35rem;min-width:0;flex:1 1 auto;}
+.now-desc{font-size:1.45rem;font-weight:800;line-height:1.1;}
+.now-range{font-size:1rem;font-weight:600;opacity:.92;}
+
+/* 四项数据：等高方块，内容垂直居中，风力换行也整齐不破相 */
+.hero-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:.55rem;margin-top:1.3rem;
+}
+.stat{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25rem;
+  min-height:4.6rem;background:rgba(255,255,255,.16);border-radius:1rem;
+  padding:.7rem .3rem;text-align:center;
+}
+.stat-label{font-size:.8rem;opacity:.82;}
+.stat-val{font-size:clamp(.92rem,3.7vw,1.08rem);font-weight:800;line-height:1.22;word-break:keep-all;}
+.stat-val span{display:block;}
+.hero-tip{
+  margin-top:1rem;background:rgba(255,255,255,.18);border-radius:.9rem;
+  padding:.7rem 1rem;font-size:1rem;font-weight:600;
+}
+.hero-updated{display:block;margin-top:1.1rem;font-size:.78rem;opacity:.72;}
+
+/* ---------- 通用卡片 ---------- */
+.card{
+  background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:1.2rem 1.15rem 1.3rem;margin-top:1.1rem;
+}
+.card-title{font-size:1.25rem;font-weight:800;margin-bottom:1rem;letter-spacing:.3px;}
+
+/* 天气预警 */
+.alert-box{
+  background:var(--warn-bg);border:2px solid var(--warn-line);color:var(--warn-ink);
+  border-radius:var(--radius);padding:1rem 1.1rem;margin-top:var(--gap);
+}
+.alert-item{display:flex;gap:.6rem;align-items:flex-start;}
+.alert-item + .alert-item{margin-top:.7rem;padding-top:.7rem;border-top:1px dashed var(--warn-line);}
+.alert-emoji{font-size:1.5rem;line-height:1.2;flex:0 0 auto;}
+.alert-title{font-size:1.1rem;font-weight:800;}
+.alert-text{font-size:.98rem;margin-top:.2rem;}
+
+/* ---------- 逐小时折线图 ---------- */
+.hourly-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -.3rem;}
+.hourly-scroll svg{height:clamp(11rem,42vw,14rem);width:auto;display:block;}
+.ht-area{fill:url(#htgrad);}
+#htgrad .g1{stop-color:var(--accent);stop-opacity:.28;}
+#htgrad .g2{stop-color:var(--accent);stop-opacity:0;}
+.ht-line{stroke:var(--accent);fill:none;}
+.ht-dot{fill:var(--card);stroke:var(--accent);}
+.ht-now circle{fill:var(--accent);}
+.ht-temp{fill:var(--ink);font-weight:800;}
+.ht-wx{fill:var(--ink);font-weight:700;}
+.ht-sub{fill:var(--ink-soft);}
+
+/* ---------- 本周天气：每天一小列横排在同一个框里 ---------- */
+.week{
+  display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 -.3rem;padding:.1rem .3rem;
+}
+.day-col{
+  flex:1 0 auto;min-width:4.4rem;
+  display:flex;flex-direction:column;align-items:center;gap:.5rem;
+  background:var(--chip);border-radius:1.1rem;padding:1rem .45rem;text-align:center;
+}
+.day-name{font-size:1.05rem;font-weight:800;}
+.day-icon{font-size:2.1rem;line-height:1;}
+.day-desc{
+  font-size:.78rem;color:var(--ink-soft);
+  max-width:5.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.day-hi{font-size:1.3rem;font-weight:800;line-height:1.1;}
+.day-lo{font-size:1.05rem;font-weight:700;line-height:1.1;color:var(--ink-soft);}
+.day-hi .lab,.day-lo .lab{
+  display:block;font-size:.64rem;font-weight:700;letter-spacing:.5px;
+  opacity:.7;margin-bottom:.05rem;
+}
+.day-air{
+  font-size:.7rem;color:var(--accent);font-weight:700;
+  background:var(--accent-soft);border-radius:.5rem;padding:.12rem .45rem;
+}
+
+/* ---------- 新闻分类筛选条 ---------- */
+.news-filter{
+  display:flex;gap:.5rem;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  margin:0 -.3rem;padding:var(--gap) .3rem .2rem;
+}
+.news-filter:empty{display:none;}
+.news-chip{
+  flex:0 0 auto;font:inherit;font-size:1rem;font-weight:700;
+  color:var(--ink-soft);background:var(--card);
+  border:1px solid var(--line);border-radius:999px;
+  padding:.55rem 1.15rem;min-height:2.9rem;cursor:pointer;white-space:nowrap;
+}
+.news-chip:active{background:var(--tap);}
+.news-chip.on{color:#fff;background:var(--accent);border-color:var(--accent);}
+
+/* ---------- 新闻列表 ---------- */
+.news-list{display:flex;flex-direction:column;gap:.85rem;padding-top:.5rem;}
+/* 图在上、大字标题在下：老人更易读，标题不再被挤窄 */
+.news-card{
+  display:flex;flex-direction:column;width:100%;text-align:left;font:inherit;cursor:pointer;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;color:var(--ink);
+}
+.news-card:active{background:var(--tap);}
+.news-thumb{
+  width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--chip);display:block;
+}
+.news-body{display:flex;flex-direction:column;padding:1rem 1.1rem;}
+.news-cat{
+  display:inline-block;align-self:flex-start;font-size:.82rem;color:var(--accent);
+  background:var(--accent-soft);border-radius:.5rem;padding:.2rem .6rem;margin-bottom:.55rem;
+}
+.news-title{font-size:1.3rem;font-weight:800;line-height:1.45;}
+.news-meta{font-size:.9rem;color:var(--ink-soft);margin-top:.6rem;}
+
+/* 看更早的新闻 */
+.news-more{padding:.2rem 0 calc(1rem + env(safe-area-inset-bottom));}
+.news-more:empty{display:none;}
+.news-more-btn{
+  width:100%;font:inherit;font-size:1.15rem;font-weight:800;
+  color:var(--accent);background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:1rem;min-height:3.4rem;cursor:pointer;
+}
+.news-more-btn:active{background:var(--tap);}
+.news-more-tip{text-align:center;color:var(--ink-soft);font-size:1rem;padding:1rem;}
+
+/* 状态提示 */
+.state-msg{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2.4rem 1rem;}
+.state-msg button{
+  margin-top:1rem;font-size:1.05rem;color:#fff;background:var(--accent);
+  border:none;border-radius:.8rem;padding:.75rem 1.5rem;min-height:3rem;cursor:pointer;
+}
+
+/* ---------- 阅读页（图文，在 app 内读完） ---------- */
+.reader{position:fixed;inset:0;background:var(--bg);z-index:20;display:flex;flex-direction:column;}
+.reader-bar{
+  background:var(--card);border-bottom:1px solid var(--line);
+  padding:.6rem .7rem;padding-top:calc(.6rem + env(safe-area-inset-top));
+}
+.reader-back{
+  display:flex;align-items:center;gap:.4rem;background:none;border:none;
+  color:var(--accent);font-size:1.2rem;font-weight:800;cursor:pointer;
+  padding:.5rem .6rem;border-radius:.6rem;min-height:3.2rem;
+}
+.reader-back:active{background:var(--tap);}
+.back-arrow{width:1.6rem;height:1.6rem;display:inline-block;}
+.reader-body{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;width:100%;
+  max-width:var(--maxw);margin:0 auto;
+  padding:1.2rem 1.2rem calc(2.4rem + env(safe-area-inset-bottom));
+}
+.reader-cat{
+  display:inline-block;font-size:.85rem;color:var(--accent);
+  background:var(--accent-soft);border-radius:.5rem;padding:.2rem .6rem;
+}
+.reader-title{font-size:1.7rem;font-weight:800;line-height:1.4;margin:.8rem 0 .5rem;}
+.reader-meta{
+  font-size:.95rem;color:var(--ink-soft);margin-bottom:1.2rem;
+  border-bottom:1px solid var(--line);padding-bottom:1rem;
+}
+.reader-body p{font-size:1.22rem;line-height:1.95;margin-bottom:1.15rem;}
+.reader-body img{
+  display:block;width:100%;height:auto;border-radius:.9rem;
+  margin:.4rem 0 1.2rem;background:var(--chip);
+}
+.reader-loading{color:var(--ink-soft);}
+
+/* ---------- 换城市面板 ---------- */
+.panel{position:fixed;inset:0;background:var(--bg);z-index:25;display:flex;flex-direction:column;}
+.panel-bar{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--card);border-bottom:1px solid var(--line);
+  padding:.9rem 1rem;padding-top:calc(.9rem + env(safe-area-inset-top));
+}
+.panel-title{font-size:1.35rem;font-weight:800;}
+.panel-close{
+  font-size:1.1rem;font-weight:700;color:var(--accent);background:var(--chip);
+  border:none;border-radius:.6rem;padding:.6rem 1.1rem;min-height:3.2rem;cursor:pointer;
+}
+.city-search{padding:1rem var(--gap) .4rem;}
+.city-input{
+  width:100%;font:inherit;font-size:1.2rem;color:var(--ink);
+  background:var(--card);border:2px solid var(--line);border-radius:.9rem;
+  padding:.85rem 1rem;min-height:3.4rem;outline:none;
+}
+.city-input::placeholder{color:var(--ink-soft);}
+.city-input:focus{border-color:var(--accent);}
+.city-note{margin-top:.55rem;font-size:.92rem;line-height:1.5;color:var(--ink-soft);}
+.city-note[hidden]{display:none;}
+.city-results{
+  flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:.6rem;
+  padding:.6rem var(--gap) calc(2rem + env(safe-area-inset-bottom));
+}
+.city-row{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.15rem;
+  width:100%;text-align:left;font:inherit;cursor:pointer;
+  color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:.9rem;
+  padding:.9rem 1.1rem;min-height:3.8rem;
+}
+.city-row:active{background:var(--tap);}
+.city-row-name{font-size:1.25rem;font-weight:800;}
+.city-row-sub{font-size:.9rem;color:var(--ink-soft);}
+.city-tip{text-align:center;color:var(--ink-soft);font-size:1.05rem;padding:2rem 1rem;}
+.city-grid{
+  flex:1;overflow-y:auto;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(6.5rem,1fr));gap:.7rem;
+  padding:.6rem var(--gap) calc(2rem + env(safe-area-inset-bottom));
+}
+.city-opt{
+  font-size:1.2rem;font-weight:700;color:var(--ink);background:var(--card);
+  border:1px solid var(--line);border-radius:.9rem;padding:1rem .4rem;
+  min-height:3.8rem;cursor:pointer;
+}
+.city-opt:active{background:var(--tap);}
+
+/* ---------- 底部标签栏 ---------- */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;display:flex;z-index:6;
+  background:var(--card);border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:.2rem;
+  background:none;border:none;color:var(--ink-soft);
+  padding:.7rem 0;min-height:5rem;cursor:pointer;font-size:1rem;font-weight:700;
+}
+.tab-icon{width:1.9rem;height:1.9rem;}
+.tab:active{background:var(--tap);}
+.tab-active{color:var(--accent);}
+
+/* 连不上服务的全屏引导：盖住一切，最高层，大字人话 */
+.net-guide{
+  position:fixed;inset:0;z-index:50;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:1.4rem;
+}
+.net-card{
+  width:100%;max-width:30rem;background:var(--card);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:2rem 1.5rem;text-align:center;
+}
+.net-emoji{font-size:3.4rem;line-height:1;}
+.net-title{font-size:1.6rem;font-weight:800;margin:1rem 0 .8rem;}
+.net-msg{font-size:1.18rem;line-height:1.8;color:var(--ink-soft);text-align:left;}
+.net-msg b{color:var(--ink);}
+.net-btn{
+  margin-top:1.5rem;width:100%;font-size:1.2rem;font-weight:800;color:#fff;
+  background:var(--accent);border:none;border-radius:.9rem;
+  padding:1rem;min-height:3.6rem;cursor:pointer;
+}
+.net-btn:active{opacity:.85;}

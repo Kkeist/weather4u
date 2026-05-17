@@ -1,0 +1,17 @@
+# 依赖 / 运行产物
+node_modules/
+DevToolsActivePort
+*.log
+
+# 本地自测临时产物（每次用完即删，不进仓库）
+_srv_test.js
+_cdptest*.mjs
+_shot.mjs
+_w.mjs
+_test*.mjs
+_t_*.png
+_h_*.png
+_a_*.png
+_cs_*.png
+_d_*.png
+_w320.png

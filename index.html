@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>天气和新闻</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 天气页 -->
+  <main id="page-weather" class="page">
+    <!-- 天气大头：渐变背景，城市 + 当前温度 + 天气，最显眼 -->
+    <header class="hero" id="hero">
+      <div class="hero-top">
+        <button id="cityBtn" class="city-btn" type="button">
+          <span id="cityName">正在定位…</span>
+          <span id="cityHint" class="city-hint">点这里换城市</span>
+        </button>
+        <div class="hero-ctrls">
+          <button id="modeBtn" class="icon-btn" type="button" aria-label="切换白天或夜间">
+            <span class="icon-btn-ic" id="modeIc" aria-hidden="true"></span>
+            <span class="icon-btn-tx" id="modeTx">夜间</span>
+          </button>
+          <button id="clockBtn" class="icon-btn" type="button" aria-label="切换12或24小时显示">
+            <span class="icon-btn-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+            </span>
+            <span class="icon-btn-tx" id="clockTx">12小时</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="nowDate" class="hero-date"></div>
+
+      <div class="hero-now">
+        <div id="nowIcon" class="now-icon"></div>
+        <div class="now-temp" id="nowTemp">--°</div>
+        <div class="now-side">
+          <div id="nowDesc" class="now-desc">加载中</div>
+          <div id="nowRange" class="now-range"></div>
+        </div>
+      </div>
+
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-label">体感</div><div id="nowFeel" class="stat-val">--°</div></div>
+        <div class="stat"><div class="stat-label">湿度</div><div id="nowHumidity" class="stat-val">--</div></div>
+        <div class="stat"><div class="stat-label">风</div><div id="nowWind" class="stat-val">--</div></div>
+        <div class="stat"><div class="stat-label">空气</div><div id="nowAir" class="stat-val">--</div></div>
+      </div>
+      <div id="nowPop" class="hero-tip" hidden></div>
+      <span id="updatedAt" class="hero-updated"></span>
+    </header>
+
+    <section id="alertBox" class="alert-box" hidden></section>
+
+    <section class="card">
+      <h2 class="card-title">接下来 24 小时</h2>
+      <div class="hourly-scroll"><div id="hourlyScroll"></div></div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">本周天气</h2>
+      <div id="dailyList" class="week"></div>
+    </section>
+  </main>
+
+  <!-- 新闻页 -->
+  <main id="page-news" class="page" hidden>
+    <div id="newsFilter" class="news-filter"></div>
+    <div id="newsList" class="news-list"></div>
+    <div id="newsMore" class="news-more"></div>
+  </main>
+
+  <!-- 新闻阅读页：图文都在 app 内读完，不跳外网 -->
+  <div id="reader" class="reader" hidden>
+    <div class="reader-bar">
+      <button id="readerBack" class="reader-back" type="button">
+        <span class="back-arrow" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 5 8 12 15 19"/></svg>
+        </span>
+        <span>返回</span>
+      </button>
+    </div>
+    <article id="readerBody" class="reader-body"></article>
+  </div>
+
+  <!-- 连不上服务时的全屏人话引导（盖住一切，最高层） -->
+  <div id="netGuide" class="net-guide" hidden>
+    <div class="net-card">
+      <div class="net-emoji">📺</div>
+      <div class="net-title">还没连上天气新闻</div>
+      <div id="netMsg" class="net-msg"></div>
+      <button id="netRetry" class="net-btn" type="button">我已打开，重新试一次</button>
+    </div>
+  </div>
+
+  <!-- 换城市面板 -->
+  <div id="cityPanel" class="panel" hidden>
+    <div class="panel-bar">
+      <span class="panel-title">选择城市</span>
+      <button id="cityClose" class="panel-close" type="button">关闭</button>
+    </div>
+    <div class="city-search">
+      <input id="citySearch" class="city-input" type="text" inputmode="search"
+             autocomplete="off" placeholder="打字搜城市，全国哪里都行">
+      <div class="city-note">下面是常用城市。要别的地方，在上面打字就能搜，县城也行。</div>
+    </div>
+    <div id="cityResults" class="city-results" hidden></div>
+    <div id="cityGrid" class="city-grid"></div>
+  </div>
+
+  <!-- 底部两个大标签 -->
+  <nav class="tabbar">
+    <button id="tab-weather" class="tab tab-active" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="100%" height="100%"><circle cx="12" cy="12" r="5" fill="currentColor"/><g stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/><line x1="4" y1="4" x2="6" y2="6"/><line x1="18" y1="18" x2="20" y2="20"/><line x1="4" y1="20" x2="6" y2="18"/><line x1="18" y1="6" x2="20" y2="4"/></g></svg>
+      </span>
+      <span class="tab-text">天气</span>
+    </button>
+    <button id="tab-news" class="tab" type="button">
+      <span class="tab-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
+      </span>
+      <span class="tab-text">新闻</span>
+    </button>
+  </nav>
+
+  <script src="js/icons.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
