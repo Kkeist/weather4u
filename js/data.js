@@ -49,7 +49,13 @@
     });
   }
 
+  // 手机 APK（Capacitor 原生环境）没有黑窗口 server.js，改走原生抓取层；
+  // 普通浏览器 / 开发期仍走本机中转 /api/*。
   var ACTIVE = RealProvider;
+  if (global.NativeData && global.NativeData.isNative()) {
+    ACTIVE = global.NativeData.provider;
+    try { global.NativeData.startImgFixer(); } catch (e) {}
+  }
 
   global.DataSource = {
     getWeather: function (sel) { return ACTIVE.getWeather(sel); },

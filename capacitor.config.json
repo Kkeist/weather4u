@@ -1,0 +1,11 @@
+{
+  "appId": "com.kkeist.weather4u",
+  "appName": "天气和新闻",
+  "webDir": "www",
+  "plugins": {
+    "CapacitorHttp": { "enabled": true }
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

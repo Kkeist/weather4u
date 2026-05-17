@@ -3,6 +3,14 @@ node_modules/
 DevToolsActivePort
 *.log
 
+# Capacitor / Android 构建产物（不进仓库；源码与配置才进）
+www/
+android/
+.gradle/
+*.apk
+_diag*.mjs
+_nm_*.png _v*_*.png _rp_*.png _cv_*.png _w_*.png _diag_*.png
+
 # 本地自测临时产物（每次用完即删，不进仓库）
 _srv_test.js
 _cdptest*.mjs

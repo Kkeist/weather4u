@@ -1,0 +1,17 @@
+{
+  "name": "weather4u",
+  "version": "1.0.0",
+  "private": true,
+  "description": "老年天气新闻 app（0 成本 / 无登录 / 无广告）",
+  "scripts": {
+    "build:www": "node build-www.js",
+    "sync": "node build-www.js && cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/core": "^8.3.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.4"
+  }
+}
